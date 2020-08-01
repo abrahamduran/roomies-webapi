@@ -1,0 +1,32 @@
+version: '3.4'
+
+services:
+  roomies.webapi:
+    image: roomies:dev
+    container_name: roomies.webapi
+    build:
+      context: .
+      dockerfile: Roomies.WebAPI/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      - roomiesdb
+    links:
+      - roomiesdb
+
+  roomiesdb:
+    image: mongo:latest
+    container_name: roomiesdb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_USERNAME: ${MONGO_INITDB_USERNAME}
+      MONGO_INITDB_PASSWORD: ${MONGO_INITDB_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+    volumes:
+      - ./.mongodb/entrypoint/:/docker-entrypoint-initdb.d/
+      - ./.mongodb/home:/home/mongodb/
+      - ./.mongodb/data/db/:/data/db/
+      - ./.mongodb/data/log/:/var/log/mongodb/
+    ports:
+      - "27017:27017"

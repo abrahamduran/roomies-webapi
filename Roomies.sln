@@ -3,6 +3,10 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Roomies.WebAPI", "Roomies.WebAPI\Roomies.WebAPI.csproj", "{40621E3C-A34B-4AE3-96AB-846F54B8655C}"
 EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{C57EDACF-1B6F-4613-B8E8-5F4BC5BCD05E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Roomies.Tests", "Roomies.Tests\Roomies.Tests.csproj", "{2D695A8B-C401-4C8D-A16B-8755CA3A4D6A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -13,5 +17,13 @@ Global
 		{40621E3C-A34B-4AE3-96AB-846F54B8655C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{40621E3C-A34B-4AE3-96AB-846F54B8655C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{40621E3C-A34B-4AE3-96AB-846F54B8655C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C57EDACF-1B6F-4613-B8E8-5F4BC5BCD05E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C57EDACF-1B6F-4613-B8E8-5F4BC5BCD05E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C57EDACF-1B6F-4613-B8E8-5F4BC5BCD05E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C57EDACF-1B6F-4613-B8E8-5F4BC5BCD05E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2D695A8B-C401-4C8D-A16B-8755CA3A4D6A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2D695A8B-C401-4C8D-A16B-8755CA3A4D6A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2D695A8B-C401-4C8D-A16B-8755CA3A4D6A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2D695A8B-C401-4C8D-A16B-8755CA3A4D6A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

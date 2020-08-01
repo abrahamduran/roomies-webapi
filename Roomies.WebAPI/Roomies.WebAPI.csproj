@@ -2,14 +2,18 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <DockerComposeProjectPath>../docker-compose.dcproj</DockerComposeProjectPath>
+    <UserSecretsId>435e0e9e-8df3-44d8-a875-cd98a9b3f817</UserSecretsId>
   </PropertyGroup>
 
 
   <ItemGroup>
     <Folder Include="Models\" />
+    <Folder Include="Repositories\" />
+    <Folder Include="Requests\" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="MongoDB.Driver" Version="2.10.4" />
+    <PackageReference Include="MongoDB.Driver" Version="2.11.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.5.1" />
   </ItemGroup>
 </Project>
