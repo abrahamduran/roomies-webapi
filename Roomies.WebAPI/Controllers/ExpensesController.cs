@@ -63,15 +63,20 @@ namespace Roomies.WebAPI.Controllers
                 }
                 entity.Payers = expense.Payers.Select(x => new Payer
                 {
+                    Id = x.Id,
                     Amount = expense.Distribution.GetAmount(expense, x),
                     Name = payers.Single(p => p.Id == x.Id).Name
                 });
                 var total = entity.Payers.Sum(x => x.Amount);
-                if (total != expense.Amount)
+                if (total != expense.Total)
                 {
                     ModelState.AddModelError("Payer", "The Amount and the Total Distribution Amount differ.");
                     return BadRequest(ModelState);
                 }
+                #endregion
+
+                #region Update roommates' balances
+                UpdateBalances(entity.Payers, entity.Payee, entity.Total);
                 #endregion
 
                 // validate items/amount
@@ -84,5 +89,26 @@ namespace Roomies.WebAPI.Controllers
             return BadRequest(ModelState);
         }
 
+        private void UpdateBalances(IEnumerable<Payer> payers, Payee payee, decimal total)
+        {
+            (bool isIncluded, decimal amount) payeeInfo = (false, 0);
+
+            foreach (var payer in payers)
+            {
+                payeeInfo.isIncluded = payer.Id == payee.Id;
+                if (payeeInfo.isIncluded)
+                {
+                    payeeInfo.amount = payer.Amount;
+                    continue;
+                }
+
+                _roommates.UpdateBalance(payer.Id, payer.Amount);
+            }
+
+            if (payeeInfo.isIncluded)
+                _roommates.UpdateBalance(payee.Id, -total + payeeInfo.amount);
+            else
+                _roommates.UpdateBalance(payee.Id, -total);
+        }
     }
 }

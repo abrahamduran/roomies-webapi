@@ -7,7 +7,8 @@ namespace Roomies.WebAPI.Repositories.Interfaces
     {
         IEnumerable<Roommate> Get();
         Roommate GetById(string id);
-        IEnumerable<Roommate> GetByIds(string[] ids);
+        IEnumerable<Roommate> GetByIds(IEnumerable<string> ids);
         Roommate Add(Roommate roomie);
+        decimal UpdateBalance(string id, decimal amount);
     }
 }

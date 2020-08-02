@@ -29,14 +29,23 @@ namespace Roomies.WebAPI.Repositories.Implementations
 
         public IEnumerable<Roommate> Get() => _roomies.Find(roomie => true).ToList();
 
-        public Roommate GetById(string id) => _roomies.Find(x => x.Id == id).FirstOrDefault();
+        public Roommate GetById(string id) => _roomies.Find(x => x.Id == id).Single();
 
-        public IEnumerable<Roommate> GetByIds(string[] ids) => _roomies.Find(x => ids.Contains(x.Id)).ToList();
+        public IEnumerable<Roommate> GetByIds(IEnumerable<string> ids) => _roomies.Find(x => ids.Contains(x.Id)).ToList();
 
         public Roommate Add(Roommate roomie)
         {
             _roomies.InsertOne(roomie);
             return roomie;
+        }
+
+        public decimal UpdateBalance(string id, decimal amount)
+        {
+            var filter = Builders<Roommate>.Filter.Eq(x => x.Id, id);
+            var update = Builders<Roommate>.Update.Inc(x => x.Balance, amount);
+            _roomies.UpdateOne(filter, update);
+
+            return _roomies.Find(filter).Project(x => x.Balance).Single();
         }
     }
 }
