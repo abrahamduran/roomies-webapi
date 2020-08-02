@@ -1,17 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Conventions;
 using Roomies.WebAPI.Repositories;
 using Roomies.WebAPI.Repositories.Implementations;
@@ -31,7 +26,12 @@ namespace Roomies.WebAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+            services.AddControllers()
+                .AddJsonOptions(o =>
+                {
+                    o.JsonSerializerOptions.IgnoreNullValues = true;
+                    o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+                });
 
             services.AddSwaggerGen(x =>
             {
@@ -54,9 +54,10 @@ namespace Roomies.WebAPI
             var pack = new ConventionPack
             {
                 new CamelCaseElementNameConvention(),
-                new IgnoreIfNullConvention(true)
+                new IgnoreIfNullConvention(true),
+                new EnumRepresentationConvention(BsonType.String)
             };
-            ConventionRegistry.Register("camelCaseConvention", pack, x => true);
+            ConventionRegistry.Register("roomiesDbConventions", pack, x => true);
 
             app.UseHttpsRedirection();
 
