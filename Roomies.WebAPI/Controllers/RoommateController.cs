@@ -1,10 +1,8 @@
-﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Roomies.WebAPI.Models;
-using Roomies.WebAPI.Repositories;
+using Roomies.WebAPI.Repositories.Implementations;
+using Roomies.WebAPI.Repositories.Interfaces;
 using Roomies.WebAPI.Requests;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -14,35 +12,40 @@ namespace Roomies.WebAPI.Controllers
     [Route("api/[controller]")]
     public class RoomiesController : Controller
     {
-        private readonly RoommatesService _service;
+        private readonly IRoommatesRepository _repository;
 
-        public RoomiesController(RoommatesService service)
+        public RoomiesController(IRoommatesRepository repository)
         {
-            _service = service;
+            _repository = repository;
         }
 
         [HttpGet]
-        public IEnumerable<Roommate> Get() => _service.Get();
+        public IEnumerable<Roommate> Get() => _repository.Get();
 
-        //[HttpGet("{id}")]
-        //public Roomie Get(int id)
-        //{
-        //    return "value";
-        //}
+        [HttpGet("{id}")]
+        public ActionResult<Roommate> Get(string id)
+        {
+            var result = _repository.GetById(id);
+            if (result != null) return result;
+
+            return NotFound(id);
+        }
 
         [HttpPost]
         public ActionResult<Roommate> Post([FromBody] CreateRoomie roomie)
         {
             if (ModelState.IsValid)
             {
-                var result = _service.Add(roomie);
+                var result = _repository.Add(roomie);
                 if (result != null)
-                    return Created("/roomies", result);
+                    return Created("api/roomies", result);
             }
 
             return BadRequest(ModelState);
         }
 
+        /// Handle the update of a roomie, reference in transactions should be updated as well
+        /// https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/hosted-services?view=aspnetcore-2.1&tabs=visual-studio#queued-background-tasks-1
         //[HttpPut("{id}")]
         //public void Put(int id, [FromBody] Roomie roomie)
         //{
