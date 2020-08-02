@@ -41,6 +41,7 @@ namespace Roomies.WebAPI
 
             services.AddSingleton<MongoDBContext>();
             services.AddScoped<IRoommatesRepository, RoommatesRepository>();
+            services.AddScoped<IExpensesRepository, TransactionsRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
