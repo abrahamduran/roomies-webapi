@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using MongoDB.Driver;
@@ -17,8 +17,10 @@ namespace Roomies.WebAPI.Repositories.Implementations
             _transactions = context.database.GetCollection<Transaction>(COLLECTION_NAME);
 
             #region Create Indices
-            _transactions.CreateIndex(x => x.Type);
+            _transactions.CreateIndex("type");
             _transactions.CreateIndex(x => x.Date);
+            _transactions.OfType<Expense>().CreateIndex(x => x.Payee.Id);
+            _transactions.OfType<Expense>().CreateIndex("payers._id");
             #endregion
         }
 
