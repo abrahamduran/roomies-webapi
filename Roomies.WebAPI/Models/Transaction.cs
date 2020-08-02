@@ -10,7 +10,7 @@ namespace Roomies.WebAPI.Models
         [BsonRepresentation(BsonType.DateTime)]
         public DateTime Date { get; set; }
         [BsonRepresentation(BsonType.Decimal128)]
-        public decimal Amount { get; set; }
+        public decimal Total { get; set; }
         public Payee Payee { get; set; }
         public string Description { get; set; }
         public TransactionType Type => this is Expense ? TransactionType.Expense : TransactionType.Payment;

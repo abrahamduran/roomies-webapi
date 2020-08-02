@@ -11,9 +11,9 @@ namespace Roomies.WebAPI.Extensions
             switch (distribution)
             {
                 case ExpenseDistribution.Proportional:
-                    return expense.Amount * (decimal)payer.Multiplier;
+                    return expense.Total * (decimal)payer.Multiplier;
                 case ExpenseDistribution.Even:
-                    return expense.Amount / expense.Payers.Count();
+                    return expense.Total / expense.Payers.Count();
                 default:
                     return payer.Amount;
             }

@@ -11,7 +11,7 @@ namespace Roomies.WebAPI.Requests
     {
         [Required, DataType(DataType.Currency)]
         [Range(1, double.MaxValue, ErrorMessage = "Please enter a valid value. The {0} field requires values greater than 0.")]
-        public decimal Amount { get; set; }
+        public decimal Total { get; set; }
         [Required, DataType(DataType.Date)]
         public DateTime Date { get; set; }
         [Required]
@@ -27,7 +27,7 @@ namespace Roomies.WebAPI.Requests
         {
             return new Expense
             {
-                Amount = registerExpense.Amount,
+                Total = registerExpense.Total,
                 Date = registerExpense.Date,
                 Description = registerExpense.Description,
                 Distribution = registerExpense.Distribution
