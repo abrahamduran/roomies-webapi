@@ -53,7 +53,12 @@ namespace Roomies.WebAPI
                 app.UseDeveloperExceptionPage();
             }
 
-            ConventionRegistry.Register("camelCaseConvention", new ConventionPack { new CamelCaseElementNameConvention() }, x => true);
+            var pack = new ConventionPack
+            {
+                new CamelCaseElementNameConvention(),
+                new IgnoreIfNullConvention(true)
+            };
+            ConventionRegistry.Register("camelCaseConvention", pack, x => true);
 
             app.UseHttpsRedirection();
 
