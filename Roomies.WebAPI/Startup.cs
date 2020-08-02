@@ -14,6 +14,8 @@ using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using MongoDB.Bson.Serialization.Conventions;
 using Roomies.WebAPI.Repositories;
+using Roomies.WebAPI.Repositories.Implementations;
+using Roomies.WebAPI.Repositories.Interfaces;
 
 namespace Roomies.WebAPI
 {
@@ -35,14 +37,10 @@ namespace Roomies.WebAPI
             {
                 x.SwaggerDoc("v1", new OpenApiInfo { Title = "Roomies API", Version = "v1" });
             });
+            services.Configure<RoomiesDBSettings>(Configuration.GetSection(nameof(RoomiesDBSettings)));
 
-            services.Configure<RoomiesDatabaseSettings>(Configuration.GetSection(nameof(RoomiesDatabaseSettings)));
-            services.AddSingleton<IRoomiesDatabaseSettings>(sp =>sp
-                .GetRequiredService<IOptions<RoomiesDatabaseSettings>>()
-                .Value
-            );
-
-            services.AddSingleton<RoommatesService>();
+            services.AddSingleton<MongoDBContext>();
+            services.AddScoped<IRoommatesRepository, RoommatesRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

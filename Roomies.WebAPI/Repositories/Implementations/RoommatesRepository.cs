@@ -7,20 +7,19 @@ using System.Threading;
 using System.Threading.Tasks;
 using MongoDB.Driver;
 using Roomies.WebAPI.Models;
+using Roomies.WebAPI.Repositories.Interfaces;
 
-namespace Roomies.WebAPI.Repositories
+namespace Roomies.WebAPI.Repositories.Implementations
 {
-    public class RoommatesService
+    public class RoommatesRepository : IRoommatesRepository
     {
         private const string COLLECTION_NAME = "roommates";
 
         private readonly IMongoCollection<Roommate> _roomies;
 
-        public RoommatesService(IRoomiesDatabaseSettings settings)
+        public RoommatesRepository(MongoDBContext context)
         {
-            var client = new MongoClient($"{settings.ConnectionString}{settings.DatabaseName}");
-            var database = client.GetDatabase(settings.DatabaseName);
-            _roomies = database.GetCollection<Roommate>(COLLECTION_NAME);
+            _roomies = context.database.GetCollection<Roommate>(COLLECTION_NAME);
 
             #region Create Indices
             _roomies.CreateUniqueIndex(x => x.Email);
@@ -29,6 +28,10 @@ namespace Roomies.WebAPI.Repositories
         }
 
         public IEnumerable<Roommate> Get() => _roomies.Find(roomie => true).ToList();
+
+        public Roommate GetById(string id) => _roomies.Find(x => x.Id == id).FirstOrDefault();
+
+        public IEnumerable<Roommate> GetByIds(string[] ids) => _roomies.Find(x => ids.Contains(x.Id)).ToList();
 
         public Roommate Add(Roommate roomie)
         {
