@@ -1,9 +1,10 @@
 ﻿using System;
 namespace Roomies.WebAPI.Models
 {
-    public class Payment : Entity
+    public class Payment : Transaction
     {
-        public decimal Amount { get; set; }
         public Expense Expense { get; set; }
+
+        private new TransactionType Type { get; }
     }
 }
