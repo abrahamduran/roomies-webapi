@@ -20,7 +20,10 @@ namespace Roomies.WebAPI.Repositories.Implementations
             _transactions.CreateIndex("type");
             _transactions.CreateIndex(x => x.Date);
             _transactions.OfType<Expense>().CreateIndex(x => x.Payee.Id);
+            _transactions.OfType<Expense>().CreateIndex(x => x.BusinessName);
             _transactions.OfType<Expense>().CreateIndex("payers._id");
+            _transactions.OfType<DetailedExpense>().CreateIndex("items.name");
+            _transactions.OfType<DetailedExpense>().CreateIndex("items.payers._id");
             #endregion
         }
 

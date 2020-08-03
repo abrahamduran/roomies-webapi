@@ -36,7 +36,6 @@ namespace Roomies.WebAPI
             services.AddSwaggerGen(x =>
             {
                 x.SwaggerDoc("v1", new OpenApiInfo { Title = "Roomies API", Version = "v1" });
-                x.CustomSchemaIds(s => s.FullName);
             });
             services.Configure<RoomiesDBSettings>(Configuration.GetSection(nameof(RoomiesDBSettings)));
 

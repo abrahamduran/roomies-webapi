@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using Roomies.WebAPI.Models;
-using Roomies.WebAPI.ValidationAttributes;
 
 namespace Roomies.WebAPI.Requests
 {
@@ -14,35 +13,84 @@ namespace Roomies.WebAPI.Requests
         public decimal Total { get; set; }
         [Required, DataType(DataType.Date)]
         public DateTime Date { get; set; }
+        [Required, MaxLength(30)]
+        public string BusinessName { get; set; }
         [Required]
         public string PayeeId { get; set; }
-        [Required, MinLength(1, ErrorMessage = "At least one payer should be selected")]
-        public IEnumerable<Payer> Payers { get; set; }
         [MaxLength(100)]
         public string Description { get; set; }
-        [Required]
+
+        #region Simple Expense
+        [MinLength(1, ErrorMessage = "At least one payer should be selected")]
+        public IEnumerable<RegisterExpensePayer> Payers { get; set; }
         public ExpenseDistribution Distribution { get; set; }
 
-        public static implicit operator Expense(RegisterExpense registerExpense)
+        public static implicit operator SimpleExpense(RegisterExpense registerExpense)
         {
-            return new Expense
+            return new SimpleExpense
             {
-                Total = registerExpense.Total,
                 Date = registerExpense.Date,
+                Total = registerExpense.Total,
                 Description = registerExpense.Description,
+                BusinessName = registerExpense.BusinessName,
                 Distribution = registerExpense.Distribution
             };
         }
+        #endregion
 
-        public class Payer
+        #region Detailed Expense
+        [MinLength(1, ErrorMessage = "At least one payer should be selected")]
+        public IEnumerable<RegisterExpenseItem> Items { get; set; }
+
+        public static implicit operator DetailedExpense(RegisterExpense registerExpense)
         {
-            [Required]
-            public string Id { get; set; }
-            [Range(0, double.MaxValue, ErrorMessage = "Please enter a value bigger than {0}.")]
-            [DataType(DataType.Currency)]
-            public decimal Amount { get; set; }
-            [Range(0, double.MaxValue, ErrorMessage = "Please enter a value bigger than {0}.")]
-            public double Multiplier { get; set; }
+            return new DetailedExpense
+            {
+                Date = registerExpense.Date,
+                Total = registerExpense.Total,
+                Description = registerExpense.Description,
+                BusinessName = registerExpense.BusinessName
+            };
+        }
+        #endregion
+    }
+
+    public class RegisterExpensePayer
+    {
+        [Required]
+        public string Id { get; set; }
+        [DataType(DataType.Currency)]
+        [Range(0, double.MaxValue, ErrorMessage = "Please enter a value bigger than {0}.")]
+        public decimal Amount { get; set; }
+        [Range(0, double.MaxValue, ErrorMessage = "Please enter a value bigger than {0}.")]
+        public double Multiplier { get; set; }
+    }
+
+    public class RegisterExpenseItem
+    {
+        [Required, MaxLength(30)]
+        public string Name { get; set; }
+        [Required, DataType(DataType.Currency)]
+        [Range(0.1, double.MaxValue, ErrorMessage = "Please enter a value bigger than {0}.")]
+        public decimal Price { get; set; }
+        [Range(0.1, double.MaxValue, ErrorMessage = "Please enter a value bigger than {0}.")]
+        public double Quantity { get; set; }
+        [Required, MinLength(1, ErrorMessage = "At least one payer should be selected")]
+        public IEnumerable<RegisterExpensePayer> Payers { get; set; }
+        [Required]
+        public ExpenseDistribution Distribution { get; set; }
+
+        public decimal Total => Price * (decimal)Quantity;
+
+        public static implicit operator ExpenseItem(RegisterExpenseItem expenseItem)
+        {
+            return new ExpenseItem
+            {
+                Name = expenseItem.Name,
+                Price = expenseItem.Price,
+                Quantity = expenseItem.Quantity,
+                Distribution = expenseItem.Distribution
+            };
         }
     }
 }
