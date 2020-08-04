@@ -10,13 +10,13 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     depends_on:
-      - roomiesdb
+      - roomies.db
     links:
-      - roomiesdb
+      - roomies.db
 
-  roomiesdb:
+  roomies.db:
     image: mongo:latest
-    container_name: roomiesdb
+    container_name: roomies.db
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
