@@ -6,7 +6,7 @@ services:
     container_name: roomies.webapi
     build:
       context: .
-      dockerfile: Roomies.WebAPI/Dockerfile
+      dockerfile: Roomies.WebAPI/amd64/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
     depends_on:
