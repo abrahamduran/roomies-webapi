@@ -75,7 +75,7 @@ namespace Roomies.WebAPI
             app.UseSwaggerUI(x =>
             {
                 x.SwaggerEndpoint("/docs/v1/endpoints.json", "Roomies API v1");
-                x.RoutePrefix = "api";
+                x.RoutePrefix = string.Empty;
             });
             #endregion
 
