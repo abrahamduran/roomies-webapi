@@ -53,6 +53,7 @@ namespace Roomies.WebAPI
                 app.UseDeveloperExceptionPage();
             }
 
+            #region MongoDB Conventions
             var pack = new ConventionPack
             {
                 new CamelCaseElementNameConvention(),
@@ -60,6 +61,16 @@ namespace Roomies.WebAPI
                 new EnumRepresentationConvention(BsonType.String)
             };
             ConventionRegistry.Register("roomiesDbConventions", pack, x => true);
+            #endregion
+
+            #region Swagger
+            app.UseSwagger(x => x.RouteTemplate = "docs/{documentName}/endpoints.json");
+            app.UseSwaggerUI(x =>
+            {
+                x.SwaggerEndpoint("/docs/v1/endpoints.json", "Roomies API v1");
+                x.RoutePrefix = "api";
+            });
+            #endregion
 
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
@@ -70,13 +81,6 @@ namespace Roomies.WebAPI
             app.UseRouting();
 
             app.UseAuthorization();
-
-            app.UseSwagger(x => x.RouteTemplate = "docs/{documentName}/endpoints.json");
-            app.UseSwaggerUI(x =>
-            {
-                x.SwaggerEndpoint("/docs/v1/endpoints.json", "Roomies API v1");
-                x.RoutePrefix = string.Empty;
-            });
 
             app.UseEndpoints(endpoints =>
             {
