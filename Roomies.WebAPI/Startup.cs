@@ -27,6 +27,8 @@ namespace Roomies.WebAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // TODO: create custom JSON serializer to ovid hiding derived classes properties
+            // https://stackoverflow.com/questions/59308763/derived-types-properties-missing-in-json-response-from-asp-net-core-api
             services.AddControllers()
                 .AddJsonOptions(o =>
                 {
