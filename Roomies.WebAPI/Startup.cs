@@ -1,3 +1,5 @@
+using System;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Builder;
@@ -9,6 +11,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Conventions;
+using Roomies.WebAPI.Models;
 using Roomies.WebAPI.Repositories;
 using Roomies.WebAPI.Repositories.Implementations;
 using Roomies.WebAPI.Repositories.Interfaces;
@@ -27,13 +30,14 @@ namespace Roomies.WebAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            // TODO: create custom JSON serializer to ovid hiding derived classes properties
+            // TODO: create custom JSON serializer to avoid hiding derived classes properties
             // https://stackoverflow.com/questions/59308763/derived-types-properties-missing-in-json-response-from-asp-net-core-api
             services.AddControllers()
                 .AddJsonOptions(o =>
                 {
                     o.JsonSerializerOptions.IgnoreNullValues = true;
                     o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+                    o.JsonSerializerOptions.Converters.Add(new DerivedTypeJsonConverter<Expense>());
                 });
 
             services.AddSwaggerGen(x =>
@@ -52,6 +56,7 @@ namespace Roomies.WebAPI
         {
             if (env.IsDevelopment())
             {
+                app.UseHttpsRedirection();
                 app.UseDeveloperExceptionPage();
             }
 
@@ -78,7 +83,6 @@ namespace Roomies.WebAPI
             {
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
             });
-            app.UseHttpsRedirection();
 
             app.UseRouting();
 
@@ -88,6 +92,19 @@ namespace Roomies.WebAPI
             {
                 endpoints.MapControllers();
             });
+        }
+    }
+
+    public class DerivedTypeJsonConverter<T> : JsonConverter<T>
+    {
+        public override T Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            return JsonSerializer.Deserialize<T>(ref reader, options);
+        }
+
+        public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options)
+        {
+            JsonSerializer.Serialize(writer, value, value?.GetType() ?? typeof(object), options);
         }
     }
 }
