@@ -48,6 +48,8 @@ namespace Roomies.WebAPI
 
             services.AddSingleton<MongoDBContext>();
             services.AddScoped<IRoommatesRepository, RoommatesRepository>();
+            services.AddScoped<ITransactionsRepository, TransactionsRepository>();
+            services.AddScoped<IPaymentsRepository, TransactionsRepository>();
             services.AddScoped<IExpensesRepository, TransactionsRepository>();
         }
 
