@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using MongoDB.Driver;
@@ -7,7 +7,7 @@ using Roomies.WebAPI.Repositories.Interfaces;
 
 namespace Roomies.WebAPI.Repositories.Implementations
 {
-    public class TransactionsRepository: IExpensesRepository
+    public class TransactionsRepository : ITransactionsRepository, IPaymentsRepository, IExpensesRepository
     {
         private const string COLLECTION_NAME = "transactions";
 
@@ -27,9 +27,19 @@ namespace Roomies.WebAPI.Repositories.Implementations
             #endregion
         }
 
-        public IEnumerable<Expense> GetExpenses() => _transactions.OfType<Expense>().Find(expense => true).SortByDescending(x => x.Date).ToList();
+        Expense IExpensesRepository.GetById(string id) => _transactions.OfType<Expense>().Find(x => x.Id == id).Single();
+
+        Payment IPaymentsRepository.GetById(string id) => _transactions.OfType<Payment>().Find(x => x.Id == id).Single();
+
+        IEnumerable<Transaction> ITransactionsRepository.Get() => _transactions.Find(transaction => true).SortByDescending(x => x.Date).ToList();
+
+        IEnumerable<Expense> IExpensesRepository.Get() => _transactions.OfType<Expense>().Find(expense => true).SortByDescending(x => x.Date).ToList();
+
+        IEnumerable<Payment> IPaymentsRepository.Get() => _transactions.OfType<Payment>().Find(payment => true).SortByDescending(x => x.Date).ToList();
 
         public Expense Add(Expense expense) => (Expense)Register(expense);
+
+        public Payment Add(Payment payment) => (Payment)Register(payment);
 
         private Transaction Register(Transaction transaction)
         {
