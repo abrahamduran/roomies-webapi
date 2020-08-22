@@ -1,6 +1,8 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mime;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Roomies.WebAPI.Extensions;
 using Roomies.WebAPI.Models;
@@ -12,6 +14,9 @@ using Roomies.WebAPI.Requests;
 namespace Roomies.WebAPI.Controllers
 {
     [Route("api/[controller]")]
+    [Produces(MediaTypeNames.Application.Json)]
+    [Consumes(MediaTypeNames.Application.Json)]
+    [ApiConventionType(typeof(DefaultApiConventions))]
     public class ExpensesController : Controller
     {
         private readonly IExpensesRepository _expenses;
@@ -32,13 +37,25 @@ namespace Roomies.WebAPI.Controllers
 
         // GET: api/expenses
         [HttpGet]
-        public IEnumerable<Expense> Get()
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public ActionResult<IEnumerable<Expense>> Get() => Ok(_expenses.Get());
+
+        // GET api/expenses/{id}
+        [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public ActionResult<Expense> Get(string id)
         {
-            return _expenses.GetExpenses();
+            var result = _expenses.GetById(id);
+            if (result != null) return Ok(result);
+
+            return NotFound(id);
         }
 
         // POST api/expenses
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         public ActionResult<Expense> Post([FromBody] RegisterExpense expense)
         {
             if (ModelState.IsValid)
@@ -48,17 +65,30 @@ namespace Roomies.WebAPI.Controllers
                 if (roommate == null)
                 {
                     ModelState.AddModelError("PayeeId", "The specified PayeeId is not valid or does not represent a registered Roommate.");
-                    return null;
+                    return BadRequest(ModelState);
                 }
                 var payee = new Payee { Id = roommate.Id, Name = roommate.Name };
                 #endregion
 
                 var result = _registerExpense(this, expense, payee);
-                if (result != null) return result;
+                if (result != null)
+                    return CreatedAtAction(nameof(Post), new { id = result.Id }, result);
             }
 
             return BadRequest(ModelState);
         }
+
+        //// PUT api/payments/5
+        //[HttpPut("{id}")]
+        //public void Put(int id, [FromBody] string value)
+        //{
+        //}
+
+        //// DELETE api/payments/5
+        //[HttpDelete("{id}")]
+        //public void Delete(int id)
+        //{
+        //}
 
         private Expense RegisterSimpleExpense(RegisterExpense simpleExpense, Payee payee)
         {
