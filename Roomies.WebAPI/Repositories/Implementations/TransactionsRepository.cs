@@ -22,6 +22,7 @@ namespace Roomies.WebAPI.Repositories.Implementations
             _transactions.OfType<Expense>().CreateIndex(x => x.Payee.Id);
             _transactions.OfType<Expense>().CreateIndex(x => x.BusinessName);
             _transactions.OfType<Expense>().CreateIndex("payers._id");
+            _transactions.OfType<DetailedExpense>().CreateIndex("items._id");
             _transactions.OfType<DetailedExpense>().CreateIndex("items.name");
             _transactions.OfType<DetailedExpense>().CreateIndex("items.payers._id");
             #endregion
@@ -36,6 +37,23 @@ namespace Roomies.WebAPI.Repositories.Implementations
         IEnumerable<Expense> IExpensesRepository.Get() => _transactions.OfType<Expense>().Find(expense => true).SortByDescending(x => x.Date).ToList();
 
         IEnumerable<Payment> IPaymentsRepository.Get() => _transactions.OfType<Payment>().Find(payment => true).SortByDescending(x => x.Date).ToList();
+
+        public ExpenseItem GetItem(string expenseId, int itemId)
+        {
+            //var filterExpenses = Builders<DetailedExpense>.Filter.Eq(x => x.Id, expenseId);
+            //var filterItems = Builders<DetailedExpense>.Filter.ElemMatch(x => x.Items, x => x.Id == itemId);
+            //var item = _transactions.OfType<DetailedExpense>().Find(filterExpenses & filterItems).Single();
+            var query = from expense in _transactions.OfType<DetailedExpense>().AsQueryable()
+                        where expense.Id == expenseId
+                        select expense.Items.Where(x => x.Id == itemId);
+            return query.ToList().Single().Single();
+        }
+
+        public IEnumerable<ExpenseItem> GetItems(string expenseId)
+        {
+            var expense = _transactions.OfType<DetailedExpense>().Find(x => x.Id == expenseId).Single();
+            return expense?.Items;
+        }
 
         public Expense Add(Expense expense) => (Expense)Register(expense);
 

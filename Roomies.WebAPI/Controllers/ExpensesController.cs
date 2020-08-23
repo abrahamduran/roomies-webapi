@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mime;
@@ -90,6 +90,32 @@ namespace Roomies.WebAPI.Controllers
         //{
         //}
 
+        // GET: api/expenses/{expenseId}/items
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [HttpGet("{expenseId}/Items")]
+        public ActionResult<IEnumerable<ExpenseItem>> GetItems(string expenseId)
+        {
+            var result = _expenses.GetItems(expenseId);
+            if (result != null)
+                return Ok(result);
+
+            return NotFound();
+        }
+
+        // GET api/expenses/{expenseId}/items/{id}
+        [HttpGet("{expenseId}/Items/{itemId:int}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public ActionResult<ExpenseItem> GetItem(string expenseId, int itemId)
+        {
+            var result = _expenses.GetItem(expenseId, itemId);
+            if (result != null)
+                return Ok(result);
+
+            return NotFound();
+        }
+
         private Expense RegisterSimpleExpense(RegisterExpense simpleExpense, Payee payee)
         {
             var entity = (SimpleExpense)simpleExpense;
@@ -126,7 +152,7 @@ namespace Roomies.WebAPI.Controllers
                 Id = x.Id,
                 Amount = simpleExpense.Distribution.GetAmount(simpleExpense, x),
                 Name = payers.Single(p => p.Id == x.Id).Name
-            });
+            }).ToList();
             var total = entity.Payers.Sum(x => x.Amount);
             if (total != simpleExpense.Total)
             {
@@ -175,17 +201,19 @@ namespace Roomies.WebAPI.Controllers
                 ModelState.AddModelError("Payers", "An Item cannot be proportional and even at the same time. Amount and Multiplier cannot be filled at the same time. Please, select only one.");
                 return null;
             }
+            var itemId = 1;
             entity.Items = detailedExpense.Items.Select(i =>
             {
                 var item = (ExpenseItem)i;
+                item.Id = itemId++;
                 item.Payers = i.Payers.Select(p => new Payer
                 {
                     Id = p.Id,
                     Name = payers.Single(x => x.Id == p.Id).Name,
                     Amount = i.Distribution.GetAmount(i, p)
-                });
+                }).ToList();
                 return item;
-            });
+            }).ToList();
             var itemsTotal = entity.Items.Sum(x => x.Total);
             if (itemsTotal != entity.Total)
             {

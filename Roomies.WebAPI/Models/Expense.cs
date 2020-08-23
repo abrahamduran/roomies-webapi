@@ -12,6 +12,7 @@ namespace Roomies.WebAPI.Models
     {
         public string BusinessName { get; set; }
         public Payment Payment { get; set; }
+        public Payee Payee { get; set; }
         public ExpenseStatus Status => Payment != null ? ExpenseStatus.Paid : ExpenseStatus.Unpaid;
 
         private new TransactionType Type { get; }
@@ -30,6 +31,8 @@ namespace Roomies.WebAPI.Models
 
     public class ExpenseItem
     {
+        [BsonElement("_id")]
+        public int Id { get; set; }
         [BsonRepresentation(BsonType.Decimal128)]
         public decimal Price { get; set; }
         public double Quantity { get; set; }
