@@ -1,9 +1,12 @@
-﻿using System;
+using System;
+
 namespace Roomies.WebAPI.Models
 {
     public class Payment : Transaction
     {
-        public Expense Expense { get; set; }
+        public Payee By { get; set; }
+        public Payee To { get; set; }
+        public Expense.Summary Expense { get; set; }
 
         private new TransactionType Type { get; }
     }
