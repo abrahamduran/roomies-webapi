@@ -55,7 +55,7 @@ namespace Roomies.WebAPI.Controllers
         // POST api/expenses
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(Dictionary<string, string[]>), StatusCodes.Status400BadRequest)]
         public ActionResult<Expense> Post([FromBody] RegisterExpense expense)
         {
             if (ModelState.IsValid)
@@ -74,17 +74,17 @@ namespace Roomies.WebAPI.Controllers
                 if (result != null)
                     return CreatedAtAction(nameof(Post), new { id = result.Id }, result);
             }
-
+            
             return BadRequest(ModelState);
         }
 
-        //// PUT api/payments/5
+        //// PUT api/expenses/{id}
         //[HttpPut("{id}")]
         //public void Put(int id, [FromBody] string value)
         //{
         //}
 
-        //// DELETE api/payments/5
+        //// DELETE api/expenses/{id}
         //[HttpDelete("{id}")]
         //public void Delete(int id)
         //{
@@ -130,7 +130,7 @@ namespace Roomies.WebAPI.Controllers
 
             #region Validate Payers
             // TODO: validate duplications before calling the database
-            var payers = _roommates.GetByIds(simpleExpense.Payers.Select(x => x.Id).Distinct());
+            var payers = _roommates.GetByIds(simpleExpense.Payers.Select(x => x.Id));
             if (payers.Count() != simpleExpense.Payers.Count())
             {
                 ModelState.AddModelError("Payers", "At least one Payer is invalid, does not represent a registered Roommate, or is duplicated.");

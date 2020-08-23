@@ -44,7 +44,7 @@ namespace Roomies.WebAPI.Controllers
         // POST api/roomies
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(Dictionary<string, string[]>), StatusCodes.Status400BadRequest)]
         public ActionResult<Roommate> Post([FromBody] CreateRoomie roomie)
         {
             // produces an error when an email is duplicated, something similar might happen with the username
