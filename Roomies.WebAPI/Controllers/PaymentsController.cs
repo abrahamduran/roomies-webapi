@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mime;
 using Microsoft.AspNetCore.Http;
@@ -62,14 +63,48 @@ namespace Roomies.WebAPI.Controllers
 
                 var expenses = _expenses.GetByIds(payment.ExpenseIds);
                 if (expenses.Count() != payment.ExpenseIds.Count())
+                {
                     ModelState.AddModelError("ExpenseIds", "One or more expenses are invalid. Please review them before submission.");
+                    return BadRequest(ModelState);
+                }
 
-                expenses.ContainsPayer(payment.PaidBy);
-                var totalExpense = expenses.Sum(x => x.Total);
+                if (!expenses.ContainsPayer(payment.PaidBy))
+                {
+                    ModelState.AddModelError("PaidBy", "The selected payer is invalid for the selected expenses.");
+                    ModelState.AddModelError("ExpenseIds", "At least one expense does not contains the selected payer.");
+                }
+                if (!expenses.ContainsPayee(payment.PaidTo))
+                {
+                    ModelState.AddModelError("PaidTo", "The selected payee is invalid for the selected expenses.");
+                    ModelState.AddModelError("ExpenseIds", "At least one expense does not contains the selected payee.");
+                    return BadRequest(ModelState);
+                }
+
+                var totalExpense = expenses.TotalForPayer(payment.PaidBy);
                 if (totalExpense != payment.Amount)
-                    ModelState.AddModelError("Total", "The total amount introduced does not match with the total amount for the expenses selected.");
-                    ModelState.AddModelError("Total", "As of now, partial payments are yet to be supported.");
+                {
+                    ModelState.AddModelError("Amount", "The amount introduced does not match with the total amount for the expenses selected.");
+                    ModelState.AddModelError("Amount", "As of now, partial payments are yet to be supported.");
+                    return BadRequest(ModelState);
+                }
 
+                var entity = new Payment
+                {
+                    By = new Payee { Id = payment.PaidBy, Name = roommates[payment.PaidBy].Name },
+                    To = new Payee { Id = payment.PaidTo, Name = roommates[payment.PaidTo].Name },
+                    Expenses = expenses.Select(x => (Expense.Summary)x),
+                    Description = payment.Description,
+                    Total = payment.Amount,
+                    Date = DateTime.Now
+                };
+
+                var result = _payments.Add(entity);
+                if (result != null)
+                {
+                    _roommates.UpdateBalance(payment.PaidBy, -payment.Amount);
+                    _roommates.UpdateBalance(payment.PaidTo, payment.Amount);
+                    return CreatedAtAction(nameof(Post), new { id = result.Id }, result);
+                }
             }
 
             if (ModelState.IsValid)

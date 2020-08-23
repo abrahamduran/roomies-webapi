@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Roomies.WebAPI.Models
 {
@@ -6,7 +7,7 @@ namespace Roomies.WebAPI.Models
     {
         public Payee By { get; set; }
         public Payee To { get; set; }
-        public Expense.Summary Expense { get; set; }
+        public IEnumerable<Expense.Summary> Expenses { get; set; }
 
         private new TransactionType Type { get; }
     }
