@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using MongoDB.Driver;
@@ -38,7 +38,7 @@ namespace Roomies.WebAPI.Repositories.Implementations
 
         IEnumerable<Payment> IPaymentsRepository.Get() => _transactions.OfType<Payment>().Find(payment => true).SortByDescending(x => x.Date).ToList();
 
-        public ExpenseItem GetItem(string expenseId, int itemId)
+        ExpenseItem IExpensesRepository.GetItem(string expenseId, int itemId)
         {
             //var filterExpenses = Builders<DetailedExpense>.Filter.Eq(x => x.Id, expenseId);
             //var filterItems = Builders<DetailedExpense>.Filter.ElemMatch(x => x.Items, x => x.Id == itemId);
@@ -49,15 +49,15 @@ namespace Roomies.WebAPI.Repositories.Implementations
             return query.ToList().Single().Single();
         }
 
-        public IEnumerable<ExpenseItem> GetItems(string expenseId)
+        IEnumerable<ExpenseItem> IExpensesRepository.GetItems(string expenseId)
         {
             var expense = _transactions.OfType<DetailedExpense>().Find(x => x.Id == expenseId).Single();
             return expense?.Items;
         }
 
-        public Expense Add(Expense expense) => (Expense)Register(expense);
+        Expense IExpensesRepository.Add(Expense expense) => (Expense)Register(expense);
 
-        public Payment Add(Payment payment) => (Payment)Register(payment);
+        Payment IPaymentsRepository.Add(Payment payment) => (Payment)Register(payment);
 
         private Transaction Register(Transaction transaction)
         {
