@@ -17,7 +17,7 @@ namespace Roomies.WebAPI.Models
     #region Payee & Payer
     public class Payee
     {
-        [BsonId]
+        [BsonElement("_id")]
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; }
         public string Name { get; set; }
@@ -25,7 +25,7 @@ namespace Roomies.WebAPI.Models
 
     public class Payer
     {
-        [BsonId]
+        [BsonElement("_id")]
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; }
         public string Name { get; set; }

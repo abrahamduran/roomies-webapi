@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mime;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Roomies.WebAPI.Extensions;
 using Roomies.WebAPI.Models;
@@ -12,6 +14,9 @@ using Roomies.WebAPI.Requests;
 namespace Roomies.WebAPI.Controllers
 {
     [Route("api/[controller]")]
+    [Produces(MediaTypeNames.Application.Json)]
+    [Consumes(MediaTypeNames.Application.Json)]
+    [ApiConventionType(typeof(DefaultApiConventions))]
     public class ExpensesController : Controller
     {
         private readonly IExpensesRepository _expenses;
@@ -32,13 +37,25 @@ namespace Roomies.WebAPI.Controllers
 
         // GET: api/expenses
         [HttpGet]
-        public IEnumerable<Expense> Get()
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public ActionResult<IEnumerable<Expense>> Get() => Ok(_expenses.Get());
+
+        // GET api/expenses/{id}
+        [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public ActionResult<Expense> Get(string id)
         {
-            return _expenses.GetExpenses();
+            var result = _expenses.GetById(id);
+            if (result != null) return Ok(result);
+
+            return NotFound(id);
         }
 
         // POST api/expenses
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(Dictionary<string, string[]>), StatusCodes.Status400BadRequest)]
         public ActionResult<Expense> Post([FromBody] RegisterExpense expense)
         {
             if (ModelState.IsValid)
@@ -48,16 +65,55 @@ namespace Roomies.WebAPI.Controllers
                 if (roommate == null)
                 {
                     ModelState.AddModelError("PayeeId", "The specified PayeeId is not valid or does not represent a registered Roommate.");
-                    return null;
+                    return BadRequest(ModelState);
                 }
                 var payee = new Payee { Id = roommate.Id, Name = roommate.Name };
                 #endregion
 
                 var result = _registerExpense(this, expense, payee);
-                if (result != null) return result;
+                if (result != null)
+                    return CreatedAtAction(nameof(Post), new { id = result.Id }, result);
             }
-
+            
             return BadRequest(ModelState);
+        }
+
+        //// PUT api/expenses/{id}
+        //[HttpPut("{id}")]
+        //public void Put(int id, [FromBody] string value)
+        //{
+        //}
+
+        //// DELETE api/expenses/{id}
+        //[HttpDelete("{id}")]
+        //public void Delete(int id)
+        //{
+        //}
+
+        // GET: api/expenses/{expenseId}/items
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [HttpGet("{expenseId}/Items")]
+        public ActionResult<IEnumerable<ExpenseItem>> GetItems(string expenseId)
+        {
+            var result = _expenses.GetItems(expenseId);
+            if (result != null)
+                return Ok(result);
+
+            return NotFound();
+        }
+
+        // GET api/expenses/{expenseId}/items/{id}
+        [HttpGet("{expenseId}/Items/{itemId:int}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public ActionResult<ExpenseItem> GetItem(string expenseId, int itemId)
+        {
+            var result = _expenses.GetItem(expenseId, itemId);
+            if (result != null)
+                return Ok(result);
+
+            return NotFound();
         }
 
         private Expense RegisterSimpleExpense(RegisterExpense simpleExpense, Payee payee)
@@ -74,7 +130,7 @@ namespace Roomies.WebAPI.Controllers
 
             #region Validate Payers
             // TODO: validate duplications before calling the database
-            var payers = _roommates.GetByIds(simpleExpense.Payers.Select(x => x.Id).Distinct());
+            var payers = _roommates.GetByIds(simpleExpense.Payers.Select(x => x.Id));
             if (payers.Count() != simpleExpense.Payers.Count())
             {
                 ModelState.AddModelError("Payers", "At least one Payer is invalid, does not represent a registered Roommate, or is duplicated.");
@@ -96,7 +152,7 @@ namespace Roomies.WebAPI.Controllers
                 Id = x.Id,
                 Amount = simpleExpense.Distribution.GetAmount(simpleExpense, x),
                 Name = payers.Single(p => p.Id == x.Id).Name
-            });
+            }).ToList();
             var total = entity.Payers.Sum(x => x.Amount);
             if (total != simpleExpense.Total)
             {
@@ -145,17 +201,19 @@ namespace Roomies.WebAPI.Controllers
                 ModelState.AddModelError("Payers", "An Item cannot be proportional and even at the same time. Amount and Multiplier cannot be filled at the same time. Please, select only one.");
                 return null;
             }
+            var itemId = 1;
             entity.Items = detailedExpense.Items.Select(i =>
             {
                 var item = (ExpenseItem)i;
+                item.Id = itemId++;
                 item.Payers = i.Payers.Select(p => new Payer
                 {
                     Id = p.Id,
                     Name = payers.Single(x => x.Id == p.Id).Name,
                     Amount = i.Distribution.GetAmount(i, p)
-                });
+                }).ToList();
                 return item;
-            });
+            }).ToList();
             var itemsTotal = entity.Items.Sum(x => x.Total);
             if (itemsTotal != entity.Total)
             {

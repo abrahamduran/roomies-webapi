@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.Serialization;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -12,9 +11,31 @@ namespace Roomies.WebAPI.Models
     {
         public string BusinessName { get; set; }
         public Payment Payment { get; set; }
+        public Payee Payee { get; set; }
         public ExpenseStatus Status => Payment != null ? ExpenseStatus.Paid : ExpenseStatus.Unpaid;
 
         private new TransactionType Type { get; }
+
+        public class Summary
+        {
+            [BsonElement("_id")]
+            [BsonRepresentation(BsonType.ObjectId)]
+            public string Id { get; set; }
+            public DateTime Date { get; set; }
+            [BsonRepresentation(BsonType.Decimal128)]
+            public decimal Total { get; set; }
+
+        }
+
+        public static implicit operator Summary(Expense expense)
+        {
+            return new Summary
+            {
+                Id = expense.Id,
+                Date = expense.Date,
+                Total = expense.Total
+            };
+        }
     }
 
     public class SimpleExpense : Expense
@@ -30,6 +51,8 @@ namespace Roomies.WebAPI.Models
 
     public class ExpenseItem
     {
+        [BsonElement("_id")]
+        public int Id { get; set; }
         [BsonRepresentation(BsonType.Decimal128)]
         public decimal Price { get; set; }
         public double Quantity { get; set; }
