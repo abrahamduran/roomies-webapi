@@ -52,7 +52,7 @@ namespace Roomies.WebAPI.Repositories.Implementations
         IEnumerable<ExpenseItem> IExpensesRepository.GetItems(string expenseId)
         {
             var expense = _transactions.OfType<DetailedExpense>().Find(x => x.Id == expenseId).Single();
-            return expense?.Items;
+            return expense?.Items.OrderBy(x => x.Id);
         }
 
         Expense IExpensesRepository.Add(Expense expense) => (Expense)Register(expense);
