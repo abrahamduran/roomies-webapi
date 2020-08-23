@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using MongoDB.Driver;
@@ -33,6 +33,8 @@ namespace Roomies.WebAPI.Repositories.Implementations
         Payment IPaymentsRepository.GetById(string id) => _transactions.OfType<Payment>().Find(x => x.Id == id).Single();
 
         IEnumerable<Transaction> ITransactionsRepository.Get() => _transactions.Find(transaction => true).SortByDescending(x => x.Date).ToList();
+
+        IEnumerable<Expense> IExpensesRepository.GetByIds(IEnumerable<string> ids) => _transactions.OfType<Expense>().Find(x => ids.Contains(x.Id)).ToList();
 
         IEnumerable<Expense> IExpensesRepository.Get() => _transactions.OfType<Expense>().Find(expense => true).SortByDescending(x => x.Date).ToList();
 

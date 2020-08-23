@@ -7,6 +7,7 @@ namespace Roomies.WebAPI.Repositories.Interfaces
     public interface IExpensesRepository
     {
         Expense GetById(string id);
+        IEnumerable<Expense> GetByIds(IEnumerable<string> ids);
         IEnumerable<Expense> Get();
         Expense Add(Expense expense);
         ExpenseItem GetItem(string expenseId, int itemId);
