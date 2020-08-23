@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using Roomies.WebAPI.Models;
 
 namespace Roomies.WebAPI.Requests
@@ -21,7 +20,7 @@ namespace Roomies.WebAPI.Requests
         public string Description { get; set; }
 
         #region Simple Expense
-        [MinLength(1, ErrorMessage = "At least one payer should be selected")]
+        [MinLength(1, ErrorMessage = "At least one payer must be selected.")]
         public IEnumerable<RegisterExpensePayer> Payers { get; set; }
         public ExpenseDistribution Distribution { get; set; }
 
@@ -39,7 +38,7 @@ namespace Roomies.WebAPI.Requests
         #endregion
 
         #region Detailed Expense
-        [MinLength(1, ErrorMessage = "At least one payer should be selected")]
+        [MinLength(1, ErrorMessage = "At least one payer must be selected.")]
         public IEnumerable<RegisterExpenseItem> Items { get; set; }
 
         public static implicit operator DetailedExpense(RegisterExpense registerExpense)
@@ -75,7 +74,7 @@ namespace Roomies.WebAPI.Requests
         public decimal Price { get; set; }
         [Range(0.1, double.MaxValue, ErrorMessage = "Please enter a value bigger than {0}.")]
         public double Quantity { get; set; }
-        [Required, MinLength(1, ErrorMessage = "At least one payer should be selected")]
+        [Required, MinLength(1, ErrorMessage = "At least one payer should be selected.")]
         public IEnumerable<RegisterExpensePayer> Payers { get; set; }
         [Required]
         public ExpenseDistribution Distribution { get; set; }
