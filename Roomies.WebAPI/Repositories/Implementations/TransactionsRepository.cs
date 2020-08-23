@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using MongoDB.Driver;
@@ -31,9 +31,9 @@ namespace Roomies.WebAPI.Repositories.Implementations
             #endregion
         }
 
-        Expense IExpensesRepository.GetById(string id) => _transactions.OfType<Expense>().Find(x => x.Id == id).Single();
+        Expense IExpensesRepository.GetById(string id) => _transactions.OfType<Expense>().Find(x => x.Id == id).SingleOrDefault();
 
-        Payment IPaymentsRepository.GetById(string id) => _transactions.OfType<Payment>().Find(x => x.Id == id).Single();
+        Payment IPaymentsRepository.GetById(string id) => _transactions.OfType<Payment>().Find(x => x.Id == id).SingleOrDefault();
 
         IEnumerable<Transaction> ITransactionsRepository.Get() => _transactions.Find(transaction => true).SortByDescending(x => x.Date).ToList();
 
@@ -47,11 +47,11 @@ namespace Roomies.WebAPI.Repositories.Implementations
         {
             //var filterExpenses = Builders<DetailedExpense>.Filter.Eq(x => x.Id, expenseId);
             //var filterItems = Builders<DetailedExpense>.Filter.ElemMatch(x => x.Items, x => x.Id == itemId);
-            //var item = _transactions.OfType<DetailedExpense>().Find(filterExpenses & filterItems).Single();
+            //return _transactions.OfType<DetailedExpense>().Find(filterExpenses & filterItems).Project(x => x.Items).Single().SingleOrDefault();
             var query = from expense in _transactions.OfType<DetailedExpense>().AsQueryable()
                         where expense.Id == expenseId
                         select expense.Items.Where(x => x.Id == itemId);
-            return query.ToList().Single().Single();
+            return query.ToList().Single().SingleOrDefault();
         }
 
         IEnumerable<ExpenseItem> IExpensesRepository.GetItems(string expenseId)

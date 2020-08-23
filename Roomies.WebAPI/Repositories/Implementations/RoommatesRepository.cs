@@ -25,7 +25,7 @@ namespace Roomies.WebAPI.Repositories.Implementations
 
         public IEnumerable<Roommate> Get() => _roomies.Find(roomie => true).ToList();
 
-        public Roommate GetById(string id) => _roomies.Find(x => x.Id == id).Single();
+        public Roommate GetById(string id) => _roomies.Find(x => x.Id == id).SingleOrDefault();
 
         public IEnumerable<Roommate> GetByIds(IEnumerable<string> ids) => _roomies.Find(x => ids.Contains(x.Id)).ToList();
 

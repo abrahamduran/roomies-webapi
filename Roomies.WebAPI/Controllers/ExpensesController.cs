@@ -49,7 +49,7 @@ namespace Roomies.WebAPI.Controllers
             var result = _expenses.GetById(id);
             if (result != null) return Ok(result);
 
-            return NotFound(id);
+            return NotFound();
         }
 
         // POST api/expenses

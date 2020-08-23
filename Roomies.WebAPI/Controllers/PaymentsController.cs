@@ -44,7 +44,7 @@ namespace Roomies.WebAPI.Controllers
             var result = _payments.GetById(id);
             if (result != null) return Ok(result);
 
-            return NotFound(id);
+            return NotFound();
         }
 
         // POST api/payments

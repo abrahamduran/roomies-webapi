@@ -38,7 +38,7 @@ namespace Roomies.WebAPI.Controllers
             var result = _repository.GetById(id);
             if (result != null) return Ok(result);
 
-            return NotFound(id);
+            return NotFound();
         }
 
         // POST api/roomies
