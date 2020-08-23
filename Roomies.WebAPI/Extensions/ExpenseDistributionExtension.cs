@@ -4,7 +4,7 @@ using Roomies.WebAPI.Requests;
 
 namespace Roomies.WebAPI.Extensions
 {
-    internal static class ExpenseDistributionExtensions
+    internal static class ExpenseDistributionExtension
     {
         internal static decimal GetAmount(this ExpenseDistribution distribution, RegisterExpense expense, RegisterExpensePayer payer)
             => GetAmount(distribution, expense.Total, payer.Multiplier, expense.Payers.Count(), payer.Amount);
