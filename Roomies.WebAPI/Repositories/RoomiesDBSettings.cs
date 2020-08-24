@@ -1,5 +1,4 @@
-﻿using System;
-namespace Roomies.WebAPI.Repositories
+﻿namespace Roomies.WebAPI.Repositories
 {
     public class RoomiesDBSettings
     {
