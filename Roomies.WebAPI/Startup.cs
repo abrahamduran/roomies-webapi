@@ -30,8 +30,17 @@ namespace Roomies.WebAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            // TODO: create custom JSON serializer to avoid hiding derived classes properties
-            // https://stackoverflow.com/questions/59308763/derived-types-properties-missing-in-json-response-from-asp-net-core-api
+            #region MongoDB Conventions
+            var pack = new ConventionPack
+            {
+                new IgnoreIfNullConvention(true),
+                new CamelCaseElementNameConvention(),
+                new IgnoreExtraElementsConvention(true),
+                new EnumRepresentationConvention(BsonType.String)
+            };
+            ConventionRegistry.Register("roomiesDbConventions", pack, x => true);
+            #endregion
+
             services.AddControllers()
                 .AddJsonOptions(o =>
                 {
@@ -62,16 +71,6 @@ namespace Roomies.WebAPI
                 app.UseDeveloperExceptionPage();
             }
 
-            #region MongoDB Conventions
-            var pack = new ConventionPack
-            {
-                new CamelCaseElementNameConvention(),
-                new IgnoreIfNullConvention(true),
-                new EnumRepresentationConvention(BsonType.String)
-            };
-            ConventionRegistry.Register("roomiesDbConventions", pack, x => true);
-            #endregion
-
             #region Swagger
             app.UseSwagger(x => x.RouteTemplate = "docs/{documentName}/endpoints.json");
             app.UseSwaggerUI(x =>
@@ -100,13 +99,9 @@ namespace Roomies.WebAPI
     public class DerivedTypeJsonConverter<T> : JsonConverter<T>
     {
         public override T Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-        {
-            return JsonSerializer.Deserialize<T>(ref reader, options);
-        }
+            => JsonSerializer.Deserialize<T>(ref reader, options);
 
         public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options)
-        {
-            JsonSerializer.Serialize(writer, value, value?.GetType() ?? typeof(object), options);
-        }
+            => JsonSerializer.Serialize(writer, value, value?.GetType() ?? typeof(object), options);
     }
 }
