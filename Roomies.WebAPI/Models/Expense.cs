@@ -62,6 +62,7 @@ namespace Roomies.WebAPI.Models
 
         public decimal Total => Price * (decimal)Quantity;
     }
+
     public enum ExpenseStatus
     {
         Unpaid, Paid

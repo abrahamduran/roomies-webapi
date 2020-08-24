@@ -9,8 +9,6 @@ using Roomies.WebAPI.Models;
 using Roomies.WebAPI.Repositories.Interfaces;
 using Roomies.WebAPI.Requests;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
 namespace Roomies.WebAPI.Controllers
 {
     [Route("api/[controller]")]
@@ -103,14 +101,9 @@ namespace Roomies.WebAPI.Controllers
                 {
                     _roommates.UpdateBalance(payment.PaidBy, -payment.Amount);
                     _roommates.UpdateBalance(payment.PaidTo, payment.Amount);
+                    _expenses.SetStatus(expenses.Select(x => x.Id).ToList(), ExpenseStatus.Paid);
                     return CreatedAtAction(nameof(Post), new { id = result.Id }, result);
                 }
-            }
-
-            if (ModelState.IsValid)
-            {
-                //if (result != null)
-                    //return CreatedAtAction(nameof(Post), new { id = result.Id }, result);
             }
 
             return BadRequest(ModelState);

@@ -17,16 +17,13 @@ namespace Roomies.WebAPI.Repositories.Implementations
             _transactions = context.database.GetCollection<Transaction>(COLLECTION_NAME);
 
             #region Create Indices
-            _transactions.CreateIndex("type"); // otherwise, will throw System.InvalidOperationException: Unable to determine the serialization information for x => Convert(x.Type, Object).
+            _transactions.CreateIndex(x => x.Type);
             _transactions.CreateIndex(x => x.Date);
             _transactions.OfType<Payment>().CreateIndex(x => x.By.Id);
             _transactions.OfType<Payment>().CreateIndex(x => x.To.Id);
             _transactions.OfType<Payment>().CreateIndex("expenses._id");
-            _transactions.OfType<Expense>().CreateIndex(x => x.BusinessName);
-            _transactions.OfType<Expense>().CreateIndex(x => x.BusinessName);
             _transactions.OfType<Expense>().CreateIndex("payers._id");
             _transactions.OfType<DetailedExpense>().CreateIndex("items._id");
-            _transactions.OfType<DetailedExpense>().CreateIndex("items.name");
             _transactions.OfType<DetailedExpense>().CreateIndex("items.payers._id");
             #endregion
         }
@@ -58,6 +55,13 @@ namespace Roomies.WebAPI.Repositories.Implementations
         {
             var expense = _transactions.OfType<DetailedExpense>().Find(x => x.Id == expenseId).Single();
             return expense?.Items.OrderBy(x => x.Id);
+        }
+
+        void IExpensesRepository.SetStatus(IEnumerable<string> ids, ExpenseStatus status)
+        {
+            var filter = Builders<Expense>.Filter.In(x => x.Id, ids);
+            var update = Builders<Expense>.Update.Set(x => x.Status, status);
+            _transactions.OfType<Expense>().UpdateMany(filter, update);
         }
 
         Expense IExpensesRepository.Add(Expense expense) => (Expense)Register(expense);

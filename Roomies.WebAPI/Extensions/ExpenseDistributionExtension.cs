@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Roomies.WebAPI.Models;
 using Roomies.WebAPI.Requests;
 
@@ -20,9 +21,10 @@ namespace Roomies.WebAPI.Extensions
                     return total * (decimal)multiplier;
                 case ExpenseDistribution.Even:
                     return total / payersCount;
-                default:
+                case ExpenseDistribution.Custom:
                     return payerAmount;
             }
+            throw new NotImplementedException($"ExpenseDistribution case {distribution} was not properly handled in GetAmount.");
         }
     }
 }
