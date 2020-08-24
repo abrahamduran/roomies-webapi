@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mime;
@@ -105,12 +105,6 @@ namespace Roomies.WebAPI.Controllers
                     _roommates.UpdateBalance(payment.PaidTo, payment.Amount);
                     return CreatedAtAction(nameof(Post), new { id = result.Id }, result);
                 }
-            }
-
-            if (ModelState.IsValid)
-            {
-                //if (result != null)
-                    //return CreatedAtAction(nameof(Post), new { id = result.Id }, result);
             }
 
             return BadRequest(ModelState);

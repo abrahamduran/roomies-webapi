@@ -6,13 +6,13 @@ namespace Roomies.WebAPI.Repositories
 {
     public class MongoDBContext
     {
-        private readonly MongoClient client;
+        private readonly MongoClient _client;
         internal readonly IMongoDatabase database;
 
         public MongoDBContext(IOptions<RoomiesDBSettings> settings)
         {
-            client = new MongoClient($"{settings.Value.ConnectionString}{settings.Value.DatabaseName}");
-            database = client.GetDatabase(settings.Value.DatabaseName);
+            _client = new MongoClient($"{settings.Value.ConnectionString}{settings.Value.DatabaseName}");
+            database = _client.GetDatabase(settings.Value.DatabaseName);
         }
     }
 }
