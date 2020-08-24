@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mime;
+using System.Threading.Channels;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Roomies.WebAPI.Extensions;
@@ -18,16 +20,11 @@ namespace Roomies.WebAPI.Controllers
     {
         private readonly IExpensesRepository _expenses;
         private readonly IRoommatesRepository _roommates;
-        private readonly Func<ExpensesController, RegisterExpense, Payee, Expense> _registerExpense = (controller, expense, payee) =>
-        {
-            if (expense.Items?.Any() == true)
-                return controller.RegisterDetailedExpense(expense, payee);
-            else
-                return controller.RegisterSimpleExpense(expense, payee);
-        };
+        private readonly ChannelWriter<IEnumerable<Autocomplete>> _channel;
 
-        public ExpensesController(IExpensesRepository expenses, IRoommatesRepository roommates)
+        public ExpensesController(Channel<IEnumerable<Autocomplete>> channel, IExpensesRepository expenses, IRoommatesRepository roommates)
         {
+            _channel = channel;
             _expenses = expenses;
             _roommates = roommates;
         }
@@ -53,7 +50,7 @@ namespace Roomies.WebAPI.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(Dictionary<string, string[]>), StatusCodes.Status400BadRequest)]
-        public ActionResult<Expense> Post([FromBody] RegisterExpense expense)
+        public async Task<ActionResult<Expense>> Post([FromBody] RegisterExpense expense)
         {
             if (ModelState.IsValid)
             {
@@ -67,9 +64,13 @@ namespace Roomies.WebAPI.Controllers
                 var payee = new Payee { Id = roommate.Id, Name = roommate.Name };
                 #endregion
 
-                var result = _registerExpense(this, expense, payee);
+                List<Autocomplete> autocomplete;
+                var result = RegisterExpense(expense, payee, out autocomplete);
                 if (result != null)
+                {
+                    await _channel.WriteAsync(autocomplete);
                     return CreatedAtAction(nameof(Post), new { id = result.Id }, result);
+                }
             }
             
             return BadRequest(ModelState);
@@ -113,7 +114,17 @@ namespace Roomies.WebAPI.Controllers
             return NotFound();
         }
 
-        private Expense RegisterSimpleExpense(RegisterExpense simpleExpense, Payee payee)
+        private Expense RegisterExpense(RegisterExpense expense, Payee payee, out List<Autocomplete> autocomplete)
+        {
+            autocomplete = new List<Autocomplete>();
+            autocomplete.Add(new Autocomplete { Text = expense.BusinessName, Type = AutocompleteType.BusinessName });
+            if (expense.Items?.Any() == true)
+                return RegisterDetailedExpense(expense, payee, autocomplete);
+            else
+                return RegisterSimpleExpense(expense, payee, autocomplete);
+        }
+
+        private Expense RegisterSimpleExpense(RegisterExpense simpleExpense, Payee payee, List<Autocomplete> autocomplete)
         {
             var entity = (SimpleExpense)simpleExpense;
             entity.Payee = payee;
@@ -159,6 +170,9 @@ namespace Roomies.WebAPI.Controllers
             #endregion
             #endregion
 
+            if (simpleExpense.Description.Length < 31)
+                autocomplete.Add(new Autocomplete { Text = simpleExpense.Description, Type = AutocompleteType.ItemName });
+
             var result = _expenses.Add(entity);
             if (result != null)
                 UpdateBalances(entity.Payers, entity.Payee, entity.Total);
@@ -166,7 +180,7 @@ namespace Roomies.WebAPI.Controllers
             return result;
         }
 
-        private Expense RegisterDetailedExpense(RegisterExpense detailedExpense, Payee payee)
+        private Expense RegisterDetailedExpense(RegisterExpense detailedExpense, Payee payee, List<Autocomplete> autocomplete)
         {
             var entity = (DetailedExpense)detailedExpense;
             entity.Payee = payee;
@@ -209,6 +223,7 @@ namespace Roomies.WebAPI.Controllers
                     Name = payers.Single(x => x.Id == p.Id).Name,
                     Amount = i.Distribution.GetAmount(i, p)
                 }).ToList();
+                autocomplete.Add(new Autocomplete { Text = item.Name, Type = AutocompleteType.ItemName });
                 return item;
             }).ToList();
             var itemsTotal = entity.Items.Sum(x => x.Total);
