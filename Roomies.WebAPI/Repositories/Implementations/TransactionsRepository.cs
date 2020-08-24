@@ -60,6 +60,13 @@ namespace Roomies.WebAPI.Repositories.Implementations
             return expense?.Items.OrderBy(x => x.Id);
         }
 
+        void IExpensesRepository.SetStatus(IEnumerable<string> ids, ExpenseStatus status)
+        {
+            var filter = Builders<Expense>.Filter.In(x => x.Id, ids);
+            var update = Builders<Expense>.Update.Set(x => x.Status, status);
+            _transactions.OfType<Expense>().UpdateMany(filter, update);
+        }
+
         Expense IExpensesRepository.Add(Expense expense) => (Expense)Register(expense);
 
         Payment IPaymentsRepository.Add(Payment payment) => (Payment)Register(payment);

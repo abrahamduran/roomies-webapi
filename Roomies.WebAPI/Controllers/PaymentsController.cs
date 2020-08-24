@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mime;
@@ -103,6 +103,7 @@ namespace Roomies.WebAPI.Controllers
                 {
                     _roommates.UpdateBalance(payment.PaidBy, -payment.Amount);
                     _roommates.UpdateBalance(payment.PaidTo, payment.Amount);
+                    _expenses.SetStatus(expenses.Select(x => x.Id).ToList(), ExpenseStatus.Paid);
                     return CreatedAtAction(nameof(Post), new { id = result.Id }, result);
                 }
             }
