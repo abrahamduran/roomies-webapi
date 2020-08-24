@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using MongoDB.Driver;
@@ -22,11 +22,8 @@ namespace Roomies.WebAPI.Repositories.Implementations
             _transactions.OfType<Payment>().CreateIndex(x => x.By.Id);
             _transactions.OfType<Payment>().CreateIndex(x => x.To.Id);
             _transactions.OfType<Payment>().CreateIndex("expenses._id");
-            _transactions.OfType<Expense>().CreateIndex(x => x.BusinessName);
-            _transactions.OfType<Expense>().CreateIndex(x => x.BusinessName);
             _transactions.OfType<Expense>().CreateIndex("payers._id");
             _transactions.OfType<DetailedExpense>().CreateIndex("items._id");
-            _transactions.OfType<DetailedExpense>().CreateIndex("items.name");
             _transactions.OfType<DetailedExpense>().CreateIndex("items.payers._id");
             #endregion
         }
