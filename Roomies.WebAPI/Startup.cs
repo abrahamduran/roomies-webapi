@@ -1,7 +1,8 @@
 using System;
-using System.Runtime.InteropServices;
+using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading.Channels;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -11,6 +12,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Conventions;
+using Roomies.WebAPI.HostedService;
 using Roomies.WebAPI.Models;
 using Roomies.WebAPI.Repositories;
 using Roomies.WebAPI.Repositories.Implementations;
@@ -56,10 +58,17 @@ namespace Roomies.WebAPI
             services.Configure<RoomiesDBSettings>(Configuration.GetSection(nameof(RoomiesDBSettings)));
 
             services.AddSingleton<MongoDBContext>();
+            services.AddSingleton<IAutocompleteRepository, AutocompleteRepository>();
+            services.AddSingleton(x => Channel.CreateUnbounded<IEnumerable<Autocomplete>>(new UnboundedChannelOptions
+            {
+                SingleReader = true,
+                SingleWriter = false
+            }));
             services.AddScoped<IRoommatesRepository, RoommatesRepository>();
             services.AddScoped<ITransactionsRepository, TransactionsRepository>();
             services.AddScoped<IPaymentsRepository, TransactionsRepository>();
             services.AddScoped<IExpensesRepository, TransactionsRepository>();
+            services.AddHostedService<AutocompleteIndexer>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
