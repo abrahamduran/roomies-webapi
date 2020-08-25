@@ -17,7 +17,7 @@ namespace Roomies.WebAPI.Repositories.Implementations
             _transactions = context.database.GetCollection<Transaction>(COLLECTION_NAME);
 
             #region Create Indices
-            _transactions.CreateIndex(x => x.Type);
+            _transactions.CreateIndex("type");
             _transactions.CreateIndex(x => x.Date);
             _transactions.OfType<Payment>().CreateIndex(x => x.By.Id);
             _transactions.OfType<Payment>().CreateIndex(x => x.To.Id);
