@@ -43,6 +43,15 @@ namespace Roomies.WebAPI
             ConventionRegistry.Register("roomiesDbConventions", pack, x => true);
             #endregion
 
+            services.AddCors(o =>
+            {
+                o.AddDefaultPolicy(x =>
+                {
+                    var allowedOrigins = Configuration.GetSection("AllowedOrigins").Get<string>().Split(";");
+                    x.WithOrigins(allowedOrigins).AllowAnyMethod().AllowAnyHeader();
+                });
+            });
+
             services.AddControllers()
                 .AddJsonOptions(o =>
                 {
@@ -93,6 +102,8 @@ namespace Roomies.WebAPI
             {
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
             });
+
+            app.UseCors();
 
             app.UseRouting();
 
