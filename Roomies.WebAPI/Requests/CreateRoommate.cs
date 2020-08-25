@@ -14,13 +14,13 @@ namespace Roomies.WebAPI.Requests
         [MaxLength(30)]
         public string Email { get; set; }
 
-        public static implicit operator Roommate(CreateRoommate createRoommmate)
+        public static implicit operator Roommate(CreateRoommate createRoommate)
         {
             return new Roommate
             {
-                Name = createRoommmate.Name,
-                Email = createRoommmate.Email,
-                Username = createRoommmate.Name.Substring(0, createRoommmate.Name.IndexOf(' ')).ToLower()
+                Name = createRoommate.Name,
+                Email = createRoommate.Email,
+                Username = createRoommate.Name.Substring(0, createRoommate.Name.IndexOf(' ')).ToLower()
             };
         }
     }
