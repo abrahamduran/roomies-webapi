@@ -38,7 +38,7 @@ namespace Roomies.WebAPI.Requests
         #endregion
 
         #region Detailed Expense
-        [MinLength(1, ErrorMessage = "At least one payer must be selected.")]
+        [MinLength(2, ErrorMessage = "At least two items must be added.")]
         public IEnumerable<RegisterExpenseItem> Items { get; set; }
 
         public static implicit operator DetailedExpense(RegisterExpense registerExpense)
