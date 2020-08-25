@@ -4,7 +4,7 @@ using Roomies.WebAPI.Models;
 
 namespace Roomies.WebAPI.Requests
 {
-    public class CreateRoomie
+    public class CreateRoommate
     {
         [Required]
         [MaxLength(30)]
@@ -14,13 +14,13 @@ namespace Roomies.WebAPI.Requests
         [MaxLength(30)]
         public string Email { get; set; }
 
-        public static implicit operator Roommate(CreateRoomie createRoomie)
+        public static implicit operator Roommate(CreateRoommate createRoommmate)
         {
             return new Roommate
             {
-                Name = createRoomie.Name,
-                Email = createRoomie.Email,
-                Username = createRoomie.Name.Substring(0, createRoomie.Name.IndexOf(' ')).ToLower()
+                Name = createRoommmate.Name,
+                Email = createRoommmate.Email,
+                Username = createRoommmate.Name.Substring(0, createRoommmate.Name.IndexOf(' ')).ToLower()
             };
         }
     }

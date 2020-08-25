@@ -11,37 +11,37 @@ namespace Roomies.WebAPI.Repositories.Implementations
     {
         private const string COLLECTION_NAME = "roommates";
 
-        private readonly IMongoCollection<Roommate> _roomies;
+        private readonly IMongoCollection<Roommate> _roommates;
 
         public RoommatesRepository(MongoDBContext context)
         {
-            _roomies = context.database.GetCollection<Roommate>(COLLECTION_NAME);
+            _roommates = context.database.GetCollection<Roommate>(COLLECTION_NAME);
 
             #region Create Indices
-            _roomies.CreateUniqueIndex(x => x.Email);
-            _roomies.CreateUniqueIndex(x => x.Username);
+            _roommates.CreateUniqueIndex(x => x.Email);
+            _roommates.CreateUniqueIndex(x => x.Username);
             #endregion
         }
 
-        public IEnumerable<Roommate> Get() => _roomies.Find(roomie => true).ToList();
+        public IEnumerable<Roommate> Get() => _roommates.Find(roommate => true).ToList();
 
-        public Roommate GetById(string id) => _roomies.Find(x => x.Id == id).SingleOrDefault();
+        public Roommate GetById(string id) => _roommates.Find(x => x.Id == id).SingleOrDefault();
 
-        public IEnumerable<Roommate> GetByIds(IEnumerable<string> ids) => _roomies.Find(x => ids.Contains(x.Id)).ToList();
+        public IEnumerable<Roommate> GetByIds(IEnumerable<string> ids) => _roommates.Find(x => ids.Contains(x.Id)).ToList();
 
-        public Roommate Add(Roommate roomie)
+        public Roommate Add(Roommate roommate)
         {
-            _roomies.InsertOne(roomie);
-            return roomie;
+            _roommates.InsertOne(roommate);
+            return roommate;
         }
 
         public decimal UpdateBalance(string id, decimal amount)
         {
             var filter = Builders<Roommate>.Filter.Eq(x => x.Id, id);
             var update = Builders<Roommate>.Update.Inc(x => x.Balance, amount);
-            _roomies.UpdateOne(filter, update);
+            _roommates.UpdateOne(filter, update);
 
-            return _roomies.Find(filter).Project(x => x.Balance).Single();
+            return _roommates.Find(filter).Project(x => x.Balance).Single();
         }
     }
 }

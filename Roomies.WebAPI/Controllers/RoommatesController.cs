@@ -12,21 +12,21 @@ namespace Roomies.WebAPI.Controllers
     [Produces(MediaTypeNames.Application.Json)]
     [Consumes(MediaTypeNames.Application.Json)]
     [ApiConventionType(typeof(DefaultApiConventions))]
-    public class RoomiesController : Controller
+    public class RoommmatesController : Controller
     {
         private readonly IRoommatesRepository _repository;
 
-        public RoomiesController(IRoommatesRepository repository)
+        public RoommmatesController(IRoommatesRepository repository)
         {
             _repository = repository;
         }
 
-        // GET api/roomies
+        // GET api/roommates
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public ActionResult<IEnumerable<Roommate>> Get() => Ok(_repository.Get());
 
-        // GET api/roomies/{id}
+        // GET api/roommates/{id}
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -38,18 +38,18 @@ namespace Roomies.WebAPI.Controllers
             return NotFound();
         }
 
-        // POST api/roomies
+        // POST api/roommates
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(Dictionary<string, string[]>), StatusCodes.Status400BadRequest)]
-        public ActionResult<Roommate> Post([FromBody] CreateRoomie roomie)
+        public ActionResult<Roommate> Post([FromBody] CreateRoommate roommate)
         {
             // produces an error when an email is duplicated, something similar might happen with the username
             // MongoDB.Driver.MongoWriteException: A write operation resulted in an error.
             // E11000 duplicate key error collection: roomies.roommates index: email_1 dup key: { email: "user@example.com" }
             if (ModelState.IsValid)
             {
-                var result = _repository.Add(roomie);
+                var result = _repository.Add(roommate);
                 if (result != null)
                     return CreatedAtAction(nameof(Post), new { id = result.Id }, result);
             }
@@ -59,13 +59,13 @@ namespace Roomies.WebAPI.Controllers
 
         /// Handle the update of a roomie, reference in transactions should be updated as well
         /// https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/hosted-services?view=aspnetcore-2.1&tabs=visual-studio#queued-background-tasks-1
-        // PUT api/roomies
+        // PUT api/roommates
         //[HttpPut("{id}")]
-        //public void Put(int id, [FromBody] Roomie roomie)
+        //public void Put(int id, [FromBody] UpdateRoommate roommate)
         //{
         //}
 
-        // DELETE api/roomies
+        // DELETE api/roommates
         //[HttpDelete("{id}")]
         //public void Delete(int id)
         //{
