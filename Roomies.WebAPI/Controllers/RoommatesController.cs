@@ -12,11 +12,11 @@ namespace Roomies.WebAPI.Controllers
     [Produces(MediaTypeNames.Application.Json)]
     [Consumes(MediaTypeNames.Application.Json)]
     [ApiConventionType(typeof(DefaultApiConventions))]
-    public class RoommmatesController : Controller
+    public class RoommatesController : Controller
     {
         private readonly IRoommatesRepository _repository;
 
-        public RoommmatesController(IRoommatesRepository repository)
+        public RoommatesController(IRoommatesRepository repository)
         {
             _repository = repository;
         }
