@@ -26,7 +26,12 @@ namespace Roomies.WebAPI.Controllers
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public ActionResult<IEnumerable<string>> Get(string text, AutocompletableField field = AutocompletableField.All)
-            => Ok(_autocomplete.Search(text, field.GetFieldType()));
+        {
+            if (string.IsNullOrEmpty(text))
+                return BadRequest("Text cannot be empty or null. Please provide a value");
+
+            return Ok(_autocomplete.Search(text, field.GetFieldType()));
+        }
 
         // POST api/values
         [HttpPost]
