@@ -194,8 +194,8 @@ namespace Roomies.WebAPI.Controllers
 
             #region Validate Payers
             // TODO: validate duplications before calling the database
-            var ids = detailedExpense.Items.SelectMany(i => i.Payers.Select(p => p.Id));
-            var payers = _roommates.GetByIds(ids.Distinct());
+            var ids = detailedExpense.Items.SelectMany(i => i.Payers.Select(p => p.Id)).Distinct();
+            var payers = _roommates.GetByIds(ids);
             if (payers.Count() != ids.Count())
             {
                 ModelState.AddModelError("Payers", "At least one Payer is invalid or does not represent a registered Roommate, or is duplicated.");
