@@ -15,6 +15,7 @@
     <Folder Include="Repositories\Implementations\" />
     <Folder Include="Extensions\" />
     <Folder Include="HostedService\" />
+    <Folder Include="Responses\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="MongoDB.Driver" Version="2.11.0" />

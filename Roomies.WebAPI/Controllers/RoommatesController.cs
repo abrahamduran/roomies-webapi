@@ -3,9 +3,11 @@ using System.Linq;
 using System.Net.Mime;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Roomies.WebAPI.Extensions;
 using Roomies.WebAPI.Models;
 using Roomies.WebAPI.Repositories.Interfaces;
 using Roomies.WebAPI.Requests;
+using Roomies.WebAPI.Responses;
 
 namespace Roomies.WebAPI.Controllers
 {
@@ -80,41 +82,49 @@ namespace Roomies.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [HttpGet("{id}/Expenses")]
-        public ActionResult<IEnumerable<Expense>> GetExpenses(string id)
+        public ActionResult<RoommateExpenses> GetExpenses(string id)
         {
             var roommate = _roommates.Get(id);
             if (roommate == null)
                 return NotFound();
 
-            var result = _expenses.Get(roommate);
-            if (result != null)
-                return Ok(result);
+            var expenses = _expenses.Get(roommate);
+            if (expenses == null)
+                return NotFound();
 
-            return NotFound();
+            var result = new RoommateExpenses
+            {
+                Expenses = expenses,
+                YourTotal = expenses.TotalForPayer(roommate.Id)
+            };
+            return Ok(result);
         }
 
         // GET api/roommates/{roommateId}/expenses/{id}
         [HttpGet("{roommateId}/Expenses/{expenseId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<ExpenseItem> GetExpense(string roommateId, string expenseId)
+        public ActionResult<RoommateExpense> GetExpense(string roommateId, string expenseId)
         {
             var expense = _expenses.Get(expenseId);
             var roommate = _roommates.Get(roommateId);
             if (roommate == null || expense == null)
                 return NotFound();
 
-            Expense result = null;
-            if (expense is SimpleExpense simple)
-                result = simple.Payers.Any(x => x.Id == roommate.Id) ? simple : null;
-
+            var result = new RoommateExpense();
+            if (expense is SimpleExpense simple && simple.Payers.Any(x => x.Id == roommate.Id))
+            {
+                result.Expense = simple;
+                result.YourTotal = simple.Payers.SingleOrDefault(x => x.Id == roommate.Id).Amount;
+            }
             else if (expense is DetailedExpense detailed)
             {
                 detailed.Items = detailed.Items.Where(x => x.Payers.Any(x => x.Id == roommate.Id));
-                result = detailed.Items.Any() ? detailed : null;
+                result.Expense = detailed.Items.Any() ? detailed : null;
+                result.YourTotal = detailed.Items.Sum(i => i.Payers.SingleOrDefault(x => x.Id == roommate.Id).Amount);
             }
             
-            if (result != null)
+            if (result.Expense != null)
                 return Ok(result);
 
             return NotFound();
