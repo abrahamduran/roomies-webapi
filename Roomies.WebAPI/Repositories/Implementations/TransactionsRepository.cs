@@ -54,6 +54,14 @@ namespace Roomies.WebAPI.Repositories.Implementations
 
         IEnumerable<Payment> IPaymentsRepository.Get() => _transactions.OfType<Payment>().Find(payment => true).SortByDescending(x => x.Date).ToList();
 
+        IEnumerable<Payment> IPaymentsRepository.Get(Roommate roommate)
+        {
+            var roommateId = ObjectId.Parse(roommate.Id);
+            var filter = Builders<Payment>.Filter.Eq(x => x.By.Id, roommate.Id);
+
+            return _transactions.OfType<Payment>().Find(filter).SortByDescending(x => x.Date).ToList();
+        }
+
         ExpenseItem IExpensesRepository.GetItem(string expenseId, int itemId)
         {
             //var filterExpenses = Builders<DetailedExpense>.Filter.Eq(x => x.Id, expenseId);

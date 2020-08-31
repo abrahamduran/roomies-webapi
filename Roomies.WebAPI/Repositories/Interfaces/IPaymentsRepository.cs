@@ -8,6 +8,7 @@ namespace Roomies.WebAPI.Repositories.Interfaces
     {
         Payment Get(string id);
         IEnumerable<Payment> Get();
+        IEnumerable<Payment> Get(Roommate roommate);
         Payment Add(Payment payment);
     }
 }

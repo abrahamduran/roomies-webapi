@@ -16,11 +16,13 @@ namespace Roomies.WebAPI.Controllers
     {
         private readonly IRoommatesRepository _roommates;
         private readonly IExpensesRepository _expenses;
+        private readonly IPaymentsRepository _payments;
 
-        public RoommatesController(IRoommatesRepository roommates, IExpensesRepository expenses)
+        public RoommatesController(IRoommatesRepository roommates, IExpensesRepository expenses, IPaymentsRepository payments)
         {
             _roommates = roommates;
             _expenses = expenses;
+            _payments = payments;
         }
 
         // GET api/roommates
@@ -100,8 +102,22 @@ namespace Roomies.WebAPI.Controllers
         //    if (result != null)
         //        return Ok(result);
 
-        //    return NotFound();
-        //}
+        // GET: api/roommates/{roommateId}/payments
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [HttpGet("{id}/Payments")]
+        public ActionResult<IEnumerable<Payment>> GetPayments(string id)
+        {
+            var roommate = _roommates.Get(id);
+            if (roommate == null)
+                return NotFound();
+
+            var result = _payments.Get(roommate);
+            if (result != null)
+                return Ok(result);
+
+            return NotFound();
+        }
 
     }
 }
