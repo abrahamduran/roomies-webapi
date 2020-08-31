@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Mime;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -92,15 +93,32 @@ namespace Roomies.WebAPI.Controllers
             return NotFound();
         }
 
-        //// GET api/expenses/{expenseId}/items/{id}
-        //[HttpGet("{expenseId}/Items/{itemId:int}")]
-        //[ProducesResponseType(StatusCodes.Status200OK)]
-        //[ProducesResponseType(StatusCodes.Status404NotFound)]
-        //public ActionResult<ExpenseItem> GetItem(string expenseId, int itemId)
-        //{
-        //    var result = _expenses.GetItem(expenseId, itemId);
-        //    if (result != null)
-        //        return Ok(result);
+        // GET api/roommates/{roommateId}/expenses/{id}
+        [HttpGet("{roommateId}/Expenses/{expenseId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public ActionResult<ExpenseItem> GetExpense(string roommateId, string expenseId)
+        {
+            var expense = _expenses.Get(expenseId);
+            var roommate = _roommates.Get(roommateId);
+            if (roommate == null || expense == null)
+                return NotFound();
+
+            Expense result = null;
+            if (expense is SimpleExpense simple)
+                result = simple.Payers.Any(x => x.Id == roommate.Id) ? simple : null;
+
+            else if (expense is DetailedExpense detailed)
+            {
+                detailed.Items = detailed.Items.Where(x => x.Payers.Any(x => x.Id == roommate.Id));
+                result = detailed.Items.Any() ? detailed : null;
+            }
+            
+            if (result != null)
+                return Ok(result);
+
+            return NotFound();
+        }
 
         // GET: api/roommates/{roommateId}/payments
         [ProducesResponseType(StatusCodes.Status200OK)]

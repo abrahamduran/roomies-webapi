@@ -6,9 +6,9 @@ namespace Roomies.WebAPI.Repositories.Interfaces
 {
     public interface IExpensesRepository
     {
-        Expense Get(string id);
+        Expense Get(string expenseId);
         IEnumerable<Expense> Get();
-        IEnumerable<Expense> Get(IEnumerable<string> ids);
+        IEnumerable<Expense> Get(IEnumerable<string> expenseIds);
         IEnumerable<Expense> Get(Roommate roommate);
         Expense Add(Expense expense);
         ExpenseItem GetItem(string expenseId, int itemId);
