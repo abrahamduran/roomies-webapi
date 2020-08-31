@@ -39,7 +39,7 @@ namespace Roomies.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult<Payment> Get(string id)
         {
-            var result = _payments.GetById(id);
+            var result = _payments.Get(id);
             if (result != null) return Ok(result);
 
             return NotFound();
@@ -53,13 +53,13 @@ namespace Roomies.WebAPI.Controllers
         {
             if (ModelState.IsValid)
             {
-                var roommates = _roommates.GetByIds(new[] { payment.PaidTo, payment.PaidBy }).ToDictionary(x => x.Id);
+                var roommates = _roommates.Get(new[] { payment.PaidTo, payment.PaidBy }).ToDictionary(x => x.Id);
                 if (!roommates.ContainsKey(payment.PaidBy))
                     ModelState.AddModelError("PaidBy", "The PaidBy field is invalid. Please review it.");
                 if (!roommates.ContainsKey(payment.PaidTo))
                     ModelState.AddModelError("PaidTo", "The PaidBy field is invalid. Please review it.");
 
-                var expenses = _expenses.GetByIds(payment.ExpenseIds);
+                var expenses = _expenses.Get(payment.ExpenseIds);
                 if (expenses.Count() != payment.ExpenseIds.Count())
                 {
                     ModelState.AddModelError("ExpenseIds", "One or more expenses are invalid. Please review them before submission.");

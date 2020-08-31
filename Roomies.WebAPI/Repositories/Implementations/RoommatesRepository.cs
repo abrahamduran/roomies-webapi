@@ -23,11 +23,11 @@ namespace Roomies.WebAPI.Repositories.Implementations
             #endregion
         }
 
+        public Roommate Get(string id) => _roommates.Find(x => x.Id == id).SingleOrDefault();
+
         public IEnumerable<Roommate> Get() => _roommates.Find(roommate => true).ToList();
 
-        public Roommate GetById(string id) => _roommates.Find(x => x.Id == id).SingleOrDefault();
-
-        public IEnumerable<Roommate> GetByIds(IEnumerable<string> ids) => _roommates.Find(x => ids.Contains(x.Id)).ToList();
+        public IEnumerable<Roommate> Get(IEnumerable<string> ids) => _roommates.Find(x => ids.Contains(x.Id)).ToList();
 
         public Roommate Add(Roommate roommate)
         {

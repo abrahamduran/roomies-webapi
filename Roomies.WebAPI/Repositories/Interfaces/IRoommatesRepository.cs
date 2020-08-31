@@ -5,9 +5,9 @@ namespace Roomies.WebAPI.Repositories.Interfaces
 {
     public interface IRoommatesRepository
     {
-        Roommate GetById(string id);
+        Roommate Get(string id);
         IEnumerable<Roommate> Get();
-        IEnumerable<Roommate> GetByIds(IEnumerable<string> ids);
+        IEnumerable<Roommate> Get(IEnumerable<string> ids);
         Roommate Add(Roommate roommate);
         decimal UpdateBalance(string id, decimal amount);
     }

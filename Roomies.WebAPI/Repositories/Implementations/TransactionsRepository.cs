@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using MongoDB.Driver;
@@ -28,15 +28,15 @@ namespace Roomies.WebAPI.Repositories.Implementations
             #endregion
         }
 
-        Expense IExpensesRepository.GetById(string id) => _transactions.OfType<Expense>().Find(x => x.Id == id).SingleOrDefault();
+        Expense IExpensesRepository.Get(string id) => _transactions.OfType<Expense>().Find(x => x.Id == id).SingleOrDefault();
 
-        Payment IPaymentsRepository.GetById(string id) => _transactions.OfType<Payment>().Find(x => x.Id == id).SingleOrDefault();
+        Payment IPaymentsRepository.Get(string id) => _transactions.OfType<Payment>().Find(x => x.Id == id).SingleOrDefault();
 
         IEnumerable<Transaction> ITransactionsRepository.Get() => _transactions.Find(transaction => true).SortByDescending(x => x.Date).ToList();
 
-        IEnumerable<Expense> IExpensesRepository.GetByIds(IEnumerable<string> ids) => _transactions.OfType<Expense>().Find(x => ids.Contains(x.Id)).ToList();
-
         IEnumerable<Expense> IExpensesRepository.Get() => _transactions.OfType<Expense>().Find(expense => true).SortByDescending(x => x.Date).ToList();
+
+        IEnumerable<Expense> IExpensesRepository.Get(IEnumerable<string> ids) => _transactions.OfType<Expense>().Find(x => ids.Contains(x.Id)).SortByDescending(x => x.Date).ToList();
 
         IEnumerable<Payment> IPaymentsRepository.Get() => _transactions.OfType<Payment>().Find(payment => true).SortByDescending(x => x.Date).ToList();
 

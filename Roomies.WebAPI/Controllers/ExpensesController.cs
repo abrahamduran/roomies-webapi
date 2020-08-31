@@ -40,7 +40,7 @@ namespace Roomies.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult<Expense> Get(string id)
         {
-            var result = _expenses.GetById(id);
+            var result = _expenses.Get(id);
             if (result != null) return Ok(result);
 
             return NotFound();
@@ -55,7 +55,7 @@ namespace Roomies.WebAPI.Controllers
             if (ModelState.IsValid)
             {
                 #region Validate Payee
-                var roommate = _roommates.GetById(expense.PayeeId);
+                var roommate = _roommates.Get(expense.PayeeId);
                 if (roommate == null)
                 {
                     ModelState.AddModelError("PayeeId", "The specified PayeeId is not valid or does not represent a registered Roommate.");
@@ -138,7 +138,7 @@ namespace Roomies.WebAPI.Controllers
 
             #region Validate Payers
             // TODO: validate duplications before calling the database
-            var payers = _roommates.GetByIds(simpleExpense.Payers.Select(x => x.Id));
+            var payers = _roommates.Get(simpleExpense.Payers.Select(x => x.Id));
             if (payers.Count() != simpleExpense.Payers.Count())
             {
                 ModelState.AddModelError("Payers", "At least one Payer is invalid, does not represent a registered Roommate, or is duplicated.");
@@ -195,7 +195,7 @@ namespace Roomies.WebAPI.Controllers
             #region Validate Payers
             // TODO: validate duplications before calling the database
             var ids = detailedExpense.Items.SelectMany(i => i.Payers.Select(p => p.Id)).Distinct();
-            var payers = _roommates.GetByIds(ids);
+            var payers = _roommates.Get(ids);
             if (payers.Count() != ids.Count())
             {
                 ModelState.AddModelError("Payers", "At least one Payer is invalid or does not represent a registered Roommate, or is duplicated.");

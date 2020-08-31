@@ -14,17 +14,17 @@ namespace Roomies.WebAPI.Controllers
     [ApiConventionType(typeof(DefaultApiConventions))]
     public class RoommatesController : Controller
     {
-        private readonly IRoommatesRepository _repository;
+        private readonly IRoommatesRepository _roommates;
 
-        public RoommatesController(IRoommatesRepository repository)
+        public RoommatesController(IRoommatesRepository roommates)
         {
-            _repository = repository;
+            _roommates = roommates;
         }
 
         // GET api/roommates
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult<IEnumerable<Roommate>> Get() => Ok(_repository.Get());
+        public ActionResult<IEnumerable<Roommate>> Get() => Ok(_roommates.Get());
 
         // GET api/roommates/{id}
         [HttpGet("{id}")]
@@ -32,7 +32,7 @@ namespace Roomies.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult<Roommate> Get(string id)
         {
-            var result = _repository.GetById(id);
+            var result = _roommates.Get(id);
             if (result != null) return Ok(result);
 
             return NotFound();
@@ -49,7 +49,7 @@ namespace Roomies.WebAPI.Controllers
             // E11000 duplicate key error collection: roomies.roommates index: email_1 dup key: { email: "user@example.com" }
             if (ModelState.IsValid)
             {
-                var result = _repository.Add(roommate);
+                var result = _roommates.Add(roommate);
                 if (result != null)
                     return CreatedAtAction(nameof(Post), new { id = result.Id }, result);
             }
