@@ -10,10 +10,10 @@ namespace Roomies.WebAPI.Extensions
         internal static bool ContainsPayer(this IEnumerable<Expense> expenses, string payerId)
             => expenses.All(x =>
             {
-                if (x is SimpleExpense)
-                    return ((SimpleExpense)x).Payers.Any(p => p.Id == payerId);
-                if (x is DetailedExpense)
-                    return ((DetailedExpense)x).Items.Any(i => i.Payers.Any(p => p.Id == payerId));
+                if (x is SimpleExpense simple)
+                    return simple.Payers.Any(p => p.Id == payerId);
+                if (x is DetailedExpense detailed)
+                    return detailed.Items.Any(i => i.Payers.Any(p => p.Id == payerId));
                 return false;
             });
 
@@ -23,10 +23,10 @@ namespace Roomies.WebAPI.Extensions
         internal static decimal TotalForPayer(this IEnumerable<Expense> expenses, string payerId)
             => expenses.Sum(x =>
             {
-                if (x is SimpleExpense)
-                    return ((SimpleExpense)x).Payers.Single(p => p.Id == payerId).Amount;
-                if (x is DetailedExpense)
-                    return ((DetailedExpense)x).Items.Sum(i => i.Payers.Single(p => p.Id == payerId).Amount);
+                if (x is SimpleExpense simple)
+                    return simple.Payers.SingleOrDefault(p => p.Id == payerId)?.Amount ?? 0;
+                if (x is DetailedExpense detailed)
+                    return detailed.Items.Sum(i => i.Payers.SingleOrDefault(p => p.Id == payerId)?.Amount ?? 0);
                 return 0;
             });
     }

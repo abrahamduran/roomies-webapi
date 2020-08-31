@@ -47,7 +47,7 @@ namespace Roomies.WebAPI.Repositories.Implementations
                 Builders<Expense>.Filter.Eq("payers._id", roommateId),
                 Builders<Expense>.Filter.Eq("items.payers._id", roommateId)
             });
-            var projection = Builders<Expense>.Projection.Exclude("payers").Exclude("items").Exclude("distribution");
+            var projection = Builders<Expense>.Projection.Exclude("distribution");
 
             return _transactions.OfType<Expense>().Find(filter).Project<Expense>(projection).SortByDescending(x => x.Date).ToList();
         }
