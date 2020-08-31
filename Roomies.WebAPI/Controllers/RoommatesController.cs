@@ -15,10 +15,12 @@ namespace Roomies.WebAPI.Controllers
     public class RoommatesController : Controller
     {
         private readonly IRoommatesRepository _roommates;
+        private readonly IExpensesRepository _expenses;
 
-        public RoommatesController(IRoommatesRepository roommates)
+        public RoommatesController(IRoommatesRepository roommates, IExpensesRepository expenses)
         {
             _roommates = roommates;
+            _expenses = expenses;
         }
 
         // GET api/roommates
@@ -57,7 +59,7 @@ namespace Roomies.WebAPI.Controllers
             return BadRequest(ModelState);
         }
 
-        /// Handle the update of a roomie, reference in transactions should be updated as well
+        /// Handle the update of a roomie, references in transactions should be updated as well
         /// https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/hosted-services?view=aspnetcore-2.1&tabs=visual-studio#queued-background-tasks-1
         // PUT api/roommates
         //[HttpPut("{id}")]
@@ -70,5 +72,36 @@ namespace Roomies.WebAPI.Controllers
         //public void Delete(int id)
         //{
         //}
+
+        // GET: api/roommates/{roommateId}/expenses
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [HttpGet("{id}/Expenses")]
+        public ActionResult<IEnumerable<Expense>> GetExpenses(string id)
+        {
+            var roommate = _roommates.Get(id);
+            if (roommate == null)
+                return NotFound();
+
+            var result = _expenses.Get(roommate);
+            if (result != null)
+                return Ok(result);
+
+            return NotFound();
+        }
+
+        //// GET api/expenses/{expenseId}/items/{id}
+        //[HttpGet("{expenseId}/Items/{itemId:int}")]
+        //[ProducesResponseType(StatusCodes.Status200OK)]
+        //[ProducesResponseType(StatusCodes.Status404NotFound)]
+        //public ActionResult<ExpenseItem> GetItem(string expenseId, int itemId)
+        //{
+        //    var result = _expenses.GetItem(expenseId, itemId);
+        //    if (result != null)
+        //        return Ok(result);
+
+        //    return NotFound();
+        //}
+
     }
 }

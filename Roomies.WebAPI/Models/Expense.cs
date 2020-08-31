@@ -14,8 +14,6 @@ namespace Roomies.WebAPI.Models
         public Payee Payee { get; set; }
         public ExpenseStatus Status => Payment != null ? ExpenseStatus.Paid : ExpenseStatus.Unpaid;
 
-        private new TransactionType Type { get; }
-
         public class Summary
         {
             [BsonElement("_id")]
@@ -41,7 +39,7 @@ namespace Roomies.WebAPI.Models
     public class SimpleExpense : Expense
     {
         public IEnumerable<Payer> Payers { get; set; }
-        public ExpenseDistribution Distribution { get; set; }
+        public ExpenseDistribution? Distribution { get; set; }
     }
 
     public class DetailedExpense : Expense
