@@ -67,7 +67,7 @@ namespace Roomies.WebAPI.Requests
 
     public class RegisterExpenseItem
     {
-        [Required, MaxLength(30)]
+        [Required, MaxLength(40)]
         public string Name { get; set; }
         [Required, DataType(DataType.Currency)]
         [Range(0.1, double.MaxValue, ErrorMessage = "Please enter a value bigger than {0}.")]
