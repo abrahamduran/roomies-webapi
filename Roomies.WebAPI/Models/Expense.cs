@@ -10,9 +10,8 @@ namespace Roomies.WebAPI.Models
     public abstract class Expense : Transaction
     {
         public string BusinessName { get; set; }
-        public Payment Payment { get; set; }
         public Payee Payee { get; set; }
-        public ExpenseStatus Status => Payment != null ? ExpenseStatus.Paid : ExpenseStatus.Unpaid;
+        public ExpenseStatus Status { get; set; }
 
         public class Summary
         {
@@ -22,7 +21,6 @@ namespace Roomies.WebAPI.Models
             public DateTime Date { get; set; }
             [BsonRepresentation(BsonType.Decimal128)]
             public decimal Total { get; set; }
-
         }
 
         public static implicit operator Summary(Expense expense)
