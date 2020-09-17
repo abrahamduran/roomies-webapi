@@ -60,9 +60,9 @@ namespace Roomies.WebAPI.Requests
         public string Id { get; set; }
         [DataType(DataType.Currency)]
         [Range(0, double.MaxValue, ErrorMessage = "Please enter a value bigger than {0}.")]
-        public decimal Amount { get; set; }
-        [Range(0, double.MaxValue, ErrorMessage = "Please enter a value bigger than {0}.")]
-        public double Multiplier { get; set; }
+        public decimal? Amount { get; set; }
+        [Range(0, 1, ErrorMessage = "Please enter a value between 0 and 1.")]
+        public double? Multiplier { get; set; }
     }
 
     public class RegisterExpenseItem
