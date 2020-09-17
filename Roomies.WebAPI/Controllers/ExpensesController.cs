@@ -139,32 +139,23 @@ namespace Roomies.WebAPI.Controllers
 
             #region Validate Payers
             // TODO: validate duplications before calling the database
-            var payers = _roommates.Get(simpleExpense.Payers.Select(x => x.Id));
-            if (payers.Count() != simpleExpense.Payers.Count())
-            {
-                ModelState.AddModelError("Payers", "At least one Payer is invalid, does not represent a registered Roommate, or is duplicated.");
-                return null;
-            }
-            else if (payers.Count() == 1 && payers.First().Id == payee.Id)
-            {
-                ModelState.AddModelError("Payers", "At this moment, self expenses are not supported. Please consider other alternatives.");
-                return null;
-            }
-            var sum = simpleExpense.Payers.Sum(x => x.Amount * (decimal)x.Multiplier);
-            if (sum > 0)
-            {
-                ModelState.AddModelError("Payers", "An Expense cannot be proportional and even at the same time. Amount and Multiplier cannot be filled at the same time. Please, select only one.");
-                return null;
-            }
+            var roommates = _roommates.Get(simpleExpense.Payers.Select(x => x.Id));
+            ValidatePayers(simpleExpense.Payers, roommates, payee);
+            if (!ModelState.IsValid) return null;
+
+            ValidateDistribution(simpleExpense.Distribution, simpleExpense.Payers);
+            if (!ModelState.IsValid) return null;
+
             entity.Payers = simpleExpense.Payers.Select(x => new Payer
             {
                 Id = x.Id,
                 Amount = simpleExpense.Distribution.GetAmount(simpleExpense, x),
-                Name = payers.Single(p => p.Id == x.Id).Name
+                Name = roommates.Single(p => p.Id == x.Id).Name
             }).ToList();
             var total = entity.Payers.Sum(x => x.Amount);
             if (total != simpleExpense.Total)
             {
+                ModelState.AddModelError("Total", "The total amount for this expense and the total amount by payers' distribution differ.");
                 ModelState.AddModelError("Payers", "The total amount for this expense and the total amount by payers' distribution differ.");
                 return null;
             }
@@ -197,23 +188,17 @@ namespace Roomies.WebAPI.Controllers
             #region Validate Payers
             // TODO: validate duplications before calling the database
             var ids = detailedExpense.Items.SelectMany(i => i.Payers.Select(p => p.Id)).Distinct();
-            var payers = _roommates.Get(ids);
-            if (payers.Count() != ids.Count())
+            var roommates = _roommates.Get(ids);
+
+            foreach (var item in detailedExpense.Items)
             {
-                ModelState.AddModelError("Payers", "At least one Payer is invalid or does not represent a registered Roommate, or is duplicated.");
-                return null;
+                ValidatePayers(item.Payers, roommates, payee);
+                if (!ModelState.IsValid) return null;
+
+                ValidateDistribution(item.Distribution, item.Payers);
+                if (!ModelState.IsValid) return null;
             }
-            else if (payers.Count() == 1 && payers.First().Id == payee.Id)
-            {
-                ModelState.AddModelError("Payers", "At this moment, self expenses are not supported. Please consider other alternatives.");
-                return null;
-            }
-            var sum = detailedExpense.Items.Sum(i => i.Payers.Sum(p => p.Amount * (decimal)p.Multiplier));
-            if (sum > 0)
-            {
-                ModelState.AddModelError("Payers", "An Item cannot be proportional and even at the same time. Amount and Multiplier cannot be filled at the same time. Please, select only one.");
-                return null;
-            }
+
             var itemId = 1;
             entity.Items = detailedExpense.Items.Select(i =>
             {
@@ -222,7 +207,7 @@ namespace Roomies.WebAPI.Controllers
                 item.Payers = i.Payers.Select(p => new Payer
                 {
                     Id = p.Id,
-                    Name = payers.Single(x => x.Id == p.Id).Name,
+                    Name = roommates.Single(x => x.Id == p.Id).Name,
                     Amount = i.Distribution.GetAmount(i, p)
                 }).ToList();
                 autocomplete.Add(new Autocomplete { Text = item.Name, Type = AutocompleteType.ItemName });
@@ -232,12 +217,14 @@ namespace Roomies.WebAPI.Controllers
             if (itemsTotal != entity.Total)
             {
                 ModelState.AddModelError("Items", "The total amount for this expense and the total amount by items differ.");
+                ModelState.AddModelError("Total", "The total amount for this expense and the total amount by items differ.");
                 return null;
             }
             var total = entity.Items.Sum(i => i.Payers.Sum(p => p.Amount));
             if (total != detailedExpense.Total)
             {
-                ModelState.AddModelError("Payer", "The  total amount for this expense and the total amount by payers' distribution differ.");
+                ModelState.AddModelError("Total", "The  total amount for this expense and the total amount by payers' distribution differ.");
+                ModelState.AddModelError("Payers", "The  total amount for this expense and the total amount by payers' distribution differ.");
                 return null;
             }
             #endregion
@@ -248,6 +235,32 @@ namespace Roomies.WebAPI.Controllers
                 UpdateBalances(entity.Items.SelectMany(x => x.Payers), entity.Payee, entity.Total);
 
             return result;
+        }
+
+        private void ValidatePayers(IEnumerable<RegisterExpensePayer> payers, IEnumerable<Roommate> roommates, Payee payee)
+        {
+            if (!payers.Any() || payers.Count() != roommates.Count())
+                ModelState.AddModelError("Payers", "At least one Payer is invalid, does not represent a registered Roommate, or is duplicated.");
+
+            if (payers.Count() == 1 && payers.First().Id == payee.Id)
+            {
+                ModelState.AddModelError("PayeeId", "At this moment, self expenses are not supported. Please consider other alternatives.");
+                ModelState.AddModelError("Payers", "At this moment, self expenses are not supported. Please consider other alternatives.");
+            }
+        }
+
+        private void ValidateDistribution(ExpenseDistribution distribution, IEnumerable<RegisterExpensePayer> payers)
+        {
+            var hasInvalidPayer = payers.Any(x => x.Amount != null && x.Multiplier != null);
+            if (hasInvalidPayer)
+                ModelState.AddModelError("Payers", "An Expense cannot be proportional and even at the same time. Amount and Multiplier cannot be filled at the same time. Please, select only one.");
+
+            var hasInvalidAmount = payers.Any(x => x.Amount == null || x.Amount <= 0);
+            var hasInvalidMultiplier = payers.Any(x => x.Multiplier == null || x.Multiplier > 1 || x.Multiplier <= 0) || payers.Sum(x => (float)x.Multiplier) != 1;
+            if (distribution == ExpenseDistribution.Custom && hasInvalidAmount)
+                ModelState.AddModelError("Payers", "An Expense with custom distribution must specify payers' custom amount and it must be greater than 0.");
+            else if (distribution == ExpenseDistribution.Proportional && hasInvalidMultiplier)
+                ModelState.AddModelError("Payers", "An Expense with proportional distribution must specify payers' multiplier and it must be between 0 and 1.");
         }
 
         private void UpdateBalances(IEnumerable<Payer> payers, Payee payee, decimal total)
