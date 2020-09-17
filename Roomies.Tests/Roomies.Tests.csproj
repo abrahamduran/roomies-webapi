@@ -13,4 +13,12 @@
     <PackageReference Include="coverlet.collector" Version="1.2.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Roomies.WebAPI\Roomies.WebAPI.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Unit Tests\" />
+    <Folder Include="Integration Tests\" />
+    <Folder Include="Mocks\" />
+  </ItemGroup>
 </Project>
