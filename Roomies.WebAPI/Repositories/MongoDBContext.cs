@@ -1,5 +1,8 @@
-﻿using Microsoft.Extensions.Options;
+﻿using System;
+using Microsoft.Extensions.Options;
+using MongoDB.Bson;
 using MongoDB.Driver;
+using MongoDB.Driver.Core.Events;
 
 namespace Roomies.WebAPI.Repositories
 {
@@ -10,7 +13,17 @@ namespace Roomies.WebAPI.Repositories
 
         public MongoDBContext(IOptions<RoomiesDBSettings> settings)
         {
-            _client = new MongoClient($"{settings.Value.ConnectionString}{settings.Value.DatabaseName}");
+            var mongoUrl = new MongoUrl($"{settings.Value.ConnectionString}{settings.Value.DatabaseName}");
+            var mongoSettings = MongoClientSettings.FromUrl(mongoUrl);
+#if DEBUG
+            Console.WriteLine("DEBUG");
+            mongoSettings.ClusterConfigurator = cb => {
+                cb.Subscribe<CommandStartedEvent>(e => {
+                    Console.WriteLine($"{e.CommandName} - {e.Command.ToJson()}");
+                });
+            };
+#endif
+            _client = new MongoClient(mongoSettings);
             database = _client.GetDatabase(settings.Value.DatabaseName);
         }
     }
