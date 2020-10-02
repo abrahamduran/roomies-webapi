@@ -90,7 +90,7 @@ namespace Roomies.WebAPI.Controllers
                 {
                     By = new Payee { Id = payment.PaidBy, Name = roommates[payment.PaidBy].Name },
                     To = new Payee { Id = payment.PaidTo, Name = roommates[payment.PaidTo].Name },
-                    Expenses = expenses.Select(x => (Expense.Summary)x),
+                    Expenses = expenses.Select(x => (Expense.Summary)x).ToList(),
                     Description = payment.Description,
                     Total = payment.Amount,
                     Date = DateTime.Now
