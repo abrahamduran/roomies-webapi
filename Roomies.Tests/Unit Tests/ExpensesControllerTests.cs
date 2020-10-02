@@ -1,16 +1,12 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Channels;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Roomies.Tests.Mocks;
 using Roomies.WebAPI.Controllers;
 using Roomies.WebAPI.Models;
-using Roomies.WebAPI.Repositories.Interfaces;
 using Roomies.WebAPI.Requests;
 using Xunit;
-using Xunit.Extensions;
 
 namespace Roomies.Tests.UnitTests
 {
