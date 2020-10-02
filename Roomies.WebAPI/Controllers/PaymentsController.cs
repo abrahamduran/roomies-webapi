@@ -81,7 +81,7 @@ namespace Roomies.WebAPI.Controllers
                 var totalExpense = expenses.TotalForPayer(payment.PaidBy);
                 if (totalExpense != payment.Amount)
                 {
-                    ModelState.AddModelError("Amount", "The amount introduced does not match with the total amount for the expenses selected.");
+                    ModelState.AddModelError("Amount", "The amount introduced does not match with the total amount for the selected expenses.");
                     ModelState.AddModelError("Amount", "As of now, partial payments are yet to be supported.");
                     return BadRequest(ModelState);
                 }
