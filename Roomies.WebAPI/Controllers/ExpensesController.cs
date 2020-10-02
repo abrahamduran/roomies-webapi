@@ -127,7 +127,6 @@ namespace Roomies.WebAPI.Controllers
         private Expense RegisterSimpleExpense(RegisterExpense simpleExpense, Payee payee, List<Autocomplete> autocomplete)
         {
             var entity = (SimpleExpense)simpleExpense;
-            entity.Status = ExpenseStatus.Unpaid;
             entity.Payee = payee;
 
             #region Validations
@@ -175,7 +174,6 @@ namespace Roomies.WebAPI.Controllers
         private Expense RegisterDetailedExpense(RegisterExpense detailedExpense, Payee payee, List<Autocomplete> autocomplete)
         {
             var entity = (DetailedExpense)detailedExpense;
-            entity.Status = ExpenseStatus.Unpaid;
             entity.Payee = payee;
 
             #region Validations

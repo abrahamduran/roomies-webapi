@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Roomies.WebAPI.Models;
 using Roomies.WebAPI.Requests;
 
@@ -23,7 +23,6 @@ namespace Roomies.Tests.Mocks
                     Distribution = distribution,
                     Payee = payee ?? Payee(),
                     Payers = payers ?? new[] { Payer(), Payer(name: "Doctor Foreman") },
-                    Status = status,
                     Total = total
                 };
             }
@@ -42,7 +41,6 @@ namespace Roomies.Tests.Mocks
                     Description = description,
                     Payee = payee ?? Payee(),
                     Items = items ?? new[] { ExpenseItem() },
-                    Status = status,
                     Total = total
                 };
             }

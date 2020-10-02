@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -11,7 +12,9 @@ namespace Roomies.WebAPI.Models
     {
         public string BusinessName { get; set; }
         public Payee Payee { get; set; }
-        public ExpenseStatus Status { get; set; }
+
+        public IEnumerable<Payment.Summary> Payments { get; set; }
+        public ExpenseStatus Status => Payments?.Sum(x => x.Value) == Total ? ExpenseStatus.Paid : ExpenseStatus.Unpaid;
 
         public class Summary
         {
@@ -31,6 +34,12 @@ namespace Roomies.WebAPI.Models
                 Date = expense.Date,
                 Total = expense.Total
             };
+        }
+
+        public class PaymentUpdate
+        {
+            public string ExpenseId { get; set; }
+            public Payment.Summary Summary { get; set; }
         }
     }
 

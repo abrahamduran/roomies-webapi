@@ -28,10 +28,6 @@ namespace Roomies.Tests.Mocks
 
         public IEnumerable<ExpenseItem> GetItems(string expenseId) => ExpenseItems;
 
-        public void SetStatus(IEnumerable<string> ids, ExpenseStatus status)
-        {
-            foreach (var expense in Expenses)
-                expense.Status = status;
-        }
+        public void SetPayment(IEnumerable<Expense.PaymentUpdate> payments) { }
     }
 }
