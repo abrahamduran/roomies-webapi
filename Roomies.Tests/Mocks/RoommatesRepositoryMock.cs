@@ -6,7 +6,7 @@ using Roomies.WebAPI.Repositories.Interfaces;
 
 namespace Roomies.Tests.Mocks
 {
-    public class RoommatesRespositoryMock : IRoommatesRepository
+    public class RoommatesRepositoryMock : IRoommatesRepository
     {
         public Roommate Roommate { get; set; }
         public IEnumerable<Roommate> Roommates { get; set; }

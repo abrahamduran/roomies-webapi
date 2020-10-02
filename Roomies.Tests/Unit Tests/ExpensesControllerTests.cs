@@ -13,13 +13,13 @@ namespace Roomies.Tests.UnitTests
     public class ExpensesControllerTests
     {
         private readonly ExpensesRepositoryMock _expenses;
-        private readonly RoommatesRespositoryMock _roommates;
+        private readonly RoommatesRepositoryMock _roommates;
         private readonly ChannelMock<IEnumerable<Autocomplete>> _channel;
 
         public ExpensesControllerTests()
         {
             _expenses = new ExpensesRepositoryMock();
-            _roommates = new RoommatesRespositoryMock();
+            _roommates = new RoommatesRepositoryMock();
             _channel = new ChannelMock<IEnumerable<Autocomplete>>(new ChannelWriterMock<IEnumerable<Autocomplete>>());
         }
 
