@@ -99,6 +99,22 @@ namespace Roomies.Tests.Mocks
 
         internal static class Requests
         {
+            internal static CreateRoommate Roommate(
+                string name = "John Doe", string email = "jdoe@example.com")
+                => new CreateRoommate
+                {
+                    Name = name,
+                    Email = email,
+                };
+
+            internal static IndexAutocompletableText Autocomplete(
+                string text = "Lorem ipsum dolor sit amet", IndexAutocompletableField field = IndexAutocompletableField.ItemName)
+                => new IndexAutocompletableText
+                {
+                    Text = text,
+                    Field = field,
+                };
+
             internal static RegisterExpense RegisterSimpleExpense(
                 string payeeId = null, string businessName = "Umbrella Corp", decimal total = 1,
                 DateTime? date = null, string description = "Lorem ipsum dolor sit amet",
