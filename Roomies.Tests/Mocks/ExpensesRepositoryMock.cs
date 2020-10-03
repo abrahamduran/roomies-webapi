@@ -12,7 +12,7 @@ namespace Roomies.Tests.Mocks
         public IEnumerable<Expense> Expenses { get; set; }
         public ExpenseItem ExpenseItem { get; set; }
         public IEnumerable<ExpenseItem> ExpenseItems { get; set; }
-
+        public List<Expense.PaymentUpdate> PaymentUpdates { get; set; }
 
         public Expense Add(Expense expense) => expense;
 
@@ -28,6 +28,16 @@ namespace Roomies.Tests.Mocks
 
         public IEnumerable<ExpenseItem> GetItems(string expenseId) => ExpenseItems;
 
-        public void SetPayment(IEnumerable<Expense.PaymentUpdate> payments) { }
+        public void SetPayment(IEnumerable<Expense.PaymentUpdate> payments)
+        {
+            PaymentUpdates = payments.ToList();
+            foreach (var update in payments)
+            {
+                var expense = Expenses.Single(x => x.Id == update.ExpenseId);
+                if (expense.Payments == null)
+                    expense.Payments = new List<Payment.Summary>();
+                ((List<Payment.Summary>)expense.Payments).Add(update.Summary);
+            }
+        }
     }
 }

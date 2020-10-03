@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using Roomies.WebAPI.Extensions;
 
 namespace Roomies.WebAPI.Models
 {
@@ -14,7 +15,14 @@ namespace Roomies.WebAPI.Models
         public Payee Payee { get; set; }
 
         public IEnumerable<Payment.Summary> Payments { get; set; }
-        public ExpenseStatus Status => Payments?.Sum(x => x.Value) == Total ? ExpenseStatus.Paid : ExpenseStatus.Unpaid;
+        public ExpenseStatus Status
+        {
+            get
+            {
+                var payeeTotal = this.TotalForPayer(Payee.Id);
+                return Payments?.Sum(x => x.Value) == (Total - payeeTotal) ? ExpenseStatus.Paid : ExpenseStatus.Unpaid;
+            }
+        }
 
         public class Summary
         {
