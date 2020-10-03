@@ -60,11 +60,10 @@ namespace Roomies.WebAPI.Controllers
                     ModelState.AddModelError("PaidTo", "The PaidBy field is invalid. Please review it.");
 
                 var expenses = _expenses.Get(payment.ExpenseIds);
-                if (expenses.Count() != payment.ExpenseIds.Count())
-                {
+                if (expenses.Count() != payment.ExpenseIds.Count() || !expenses.Any())
                     ModelState.AddModelError("ExpenseIds", "One or more expenses are invalid. Please review them before submission.");
-                    return BadRequest(ModelState);
-                }
+
+                if (!ModelState.IsValid) return BadRequest(ModelState);
 
                 if (!expenses.ContainsPayer(payment.PaidBy))
                 {
@@ -75,8 +74,8 @@ namespace Roomies.WebAPI.Controllers
                 {
                     ModelState.AddModelError("PaidTo", "The selected payee is invalid for the selected expenses.");
                     ModelState.AddModelError("ExpenseIds", "At least one expense does not contains the selected payee.");
-                    return BadRequest(ModelState);
                 }
+                if (!ModelState.IsValid) return BadRequest(ModelState);
 
                 var totalExpense = expenses.TotalForPayer(payment.PaidBy);
                 if (totalExpense != payment.Amount)
@@ -103,7 +102,7 @@ namespace Roomies.WebAPI.Controllers
                         var summary = (Payment.Summary)result;
                         summary.Value = x.TotalForPayer(payment.PaidBy);
                         return new Expense.PaymentUpdate { ExpenseId = x.Id, Summary = summary };
-                    });
+                    }).ToList();
                     _roommates.UpdateBalance(payment.PaidBy, -payment.Amount);
                     _roommates.UpdateBalance(payment.PaidTo, payment.Amount);
                     _expenses.SetPayment(payments);
