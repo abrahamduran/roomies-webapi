@@ -21,6 +21,11 @@ namespace Roomies.WebAPI.Models
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; }
         public string Name { get; set; }
+
+        public static bool operator ==(Payee left, Roommate right) => left.Id == right.Id;
+        public static bool operator !=(Payee left, Roommate right) => !(left == right);
+        public override bool Equals(object obj) => obj is Payee payee && Id == payee.Id;
+        public override int GetHashCode() => HashCode.Combine(Id);
     }
 
     public class Payer

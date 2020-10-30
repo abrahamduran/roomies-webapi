@@ -12,7 +12,11 @@ namespace Roomies.Tests.Mocks
         public IEnumerable<Roommate> Roommates { get; set; }
 
 
-        public Roommate Add(Roommate roommate) => roommate;
+        public Roommate Add(Roommate roommate)
+        {
+            Roommate = roommate;
+            return roommate;
+        }
 
         public Roommate Get(string id) => Roommate;
 
