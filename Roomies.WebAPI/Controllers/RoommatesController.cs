@@ -51,6 +51,8 @@ namespace Roomies.WebAPI.Controllers
         [ProducesResponseType(typeof(Dictionary<string, string[]>), StatusCodes.Status400BadRequest)]
         public ActionResult<Roommate> Post([FromBody] CreateRoommate roommate)
         {
+            // TODO: allow CreateRoommate to specify the username
+            // TODO: manage this exception returning a bad request with the appropiate error message
             // produces an error when an email is duplicated, something similar might happen with the username
             // MongoDB.Driver.MongoWriteException: A write operation resulted in an error.
             // E11000 duplicate key error collection: roomies.roommates index: email_1 dup key: { email: "user@example.com" }
@@ -94,7 +96,7 @@ namespace Roomies.WebAPI.Controllers
 
             var result = new RoommateExpenses
             {
-                Expenses = expenses,
+                Expenses = expenses.Select(x => ExpenseResult.ForRoommate(x)).ToList(),
                 YourTotal = expenses.TotalForPayer(roommate.Id)
             };
             return Ok(result);
@@ -114,13 +116,13 @@ namespace Roomies.WebAPI.Controllers
             var result = new RoommateExpense();
             if (expense is SimpleExpense simple && simple.Payers.Any(x => x.Id == roommate.Id))
             {
-                result.Expense = simple;
+                result.Expense = ExpenseResult.ForRoommate(simple);
                 result.YourTotal = simple.Payers.SingleOrDefault(x => x.Id == roommate.Id).Amount;
             }
             else if (expense is DetailedExpense detailed)
             {
                 detailed.Items = detailed.Items.Where(x => x.Payers.Any(x => x.Id == roommate.Id));
-                result.Expense = detailed.Items.Any() ? detailed : null;
+                result.Expense = detailed.Items.Any() ? ExpenseResult.ForRoommate(detailed) : null;
                 result.YourTotal = detailed.Items.Sum(i => i.Payers.SingleOrDefault(x => x.Id == roommate.Id).Amount);
             }
             
@@ -134,7 +136,7 @@ namespace Roomies.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [HttpGet("{id}/Payments")]
-        public ActionResult<IEnumerable<Payment>> GetPayments(string id)
+        public ActionResult<IEnumerable<RoommatePayment>> GetPayments(string id)
         {
             var roommate = _roommates.Get(id);
             if (roommate == null)
@@ -142,10 +144,35 @@ namespace Roomies.WebAPI.Controllers
 
             var result = _payments.Get(roommate);
             if (result != null)
-                return Ok(result);
+                return Ok(new RoommatePayments
+                {
+                    Payments = result.Select(x => PaymentResult.ForRoommate(x)).ToList(),
+                    YourTotal = result.Sum(x => x.Total)
+                });
 
             return NotFound();
         }
 
+        // GET: api/roommates/{roommateId}/payments/{paymentId}
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [HttpGet("{roommateId}/Payments/{paymentId}")]
+        public ActionResult<IEnumerable<RoommatePayment>> GetPayment(string roommateId, string paymentId)
+        {
+            var roommate = _roommates.Get(roommateId);
+            var payment = _payments.Get(paymentId);
+            
+            if (roommate == null || payment == null)
+                return NotFound();
+
+            if (payment.By != roommate)
+                return NotFound();
+
+            return Ok(new RoommatePayment
+            {
+                Payment = PaymentResult.ForRoommate(payment),
+                YourTotal = payment.Total
+            });
+        }
     }
 }

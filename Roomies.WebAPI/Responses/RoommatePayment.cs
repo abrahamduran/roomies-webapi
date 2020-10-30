@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
+using Roomies.WebAPI.Models;
 
 namespace Roomies.WebAPI.Responses
 {
-    public class RoommateExpenses
+    public class RoommatePayment
     {
-        public IEnumerable<ExpenseResult> Expenses { get; set; }
+        public PaymentResult Payment { get; set; }
         public decimal YourTotal { get; set; }
     }
 }
