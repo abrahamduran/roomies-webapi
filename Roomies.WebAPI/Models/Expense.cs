@@ -54,7 +54,7 @@ namespace Roomies.WebAPI.Models
     public class SimpleExpense : Expense
     {
         public IEnumerable<Payer> Payers { get; set; }
-        public ExpenseDistribution? Distribution { get; set; }
+        public ExpenseDistribution Distribution { get; set; }
     }
 
     public class DetailedExpense : Expense

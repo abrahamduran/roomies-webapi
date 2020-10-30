@@ -12,7 +12,7 @@ namespace Roomies.WebAPI.Models
         [BsonRepresentation(BsonType.Decimal128)]
         public decimal Total { get; set; }
         public string Description { get; set; }
-        public TransactionType? Type => this is Expense ? TransactionType.Expense : TransactionType.Payment;
+        public TransactionType Type => this is Expense ? TransactionType.Expense : TransactionType.Payment;
     }
 
     public enum TransactionType
