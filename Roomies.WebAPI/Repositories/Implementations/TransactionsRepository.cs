@@ -79,7 +79,7 @@ namespace Roomies.WebAPI.Repositories.Implementations
             return expense?.Items.OrderBy(x => x.Id);
         }
 
-        void IExpensesRepository.SetPayment(IEnumerable<Expense.PaymentUpdate> payments)
+        void IExpensesRepository.SetPayment(IEnumerable<PaymentUpdate> payments)
         {
             var updates = payments.Select(x =>
             {

@@ -89,7 +89,7 @@ namespace Roomies.WebAPI.Controllers
                 {
                     By = new Payee { Id = payment.PaidBy, Name = roommates[payment.PaidBy].Name },
                     To = new Payee { Id = payment.PaidTo, Name = roommates[payment.PaidTo].Name },
-                    Expenses = expenses.Select(x => (Expense.Summary)x).ToList(),
+                    Expenses = expenses.Select(x => (ExpenseSummary)x).ToList(),
                     Description = payment.Description,
                     Total = payment.Amount,
                     Date = DateTime.Now
@@ -99,9 +99,9 @@ namespace Roomies.WebAPI.Controllers
                 if (result != null)
                 {
                     var payments = expenses.Select(x => {
-                        var summary = (Payment.Summary)result;
+                        var summary = (PaymentSummary)result;
                         summary.Value = x.TotalForPayer(payment.PaidBy);
-                        return new Expense.PaymentUpdate { ExpenseId = x.Id, Summary = summary };
+                        return new PaymentUpdate { ExpenseId = x.Id, Summary = summary };
                     }).ToList();
                     _roommates.UpdateBalance(payment.PaidBy, -payment.Amount);
                     _roommates.UpdateBalance(payment.PaidTo, payment.Amount);

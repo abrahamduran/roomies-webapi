@@ -9,28 +9,34 @@ namespace Roomies.WebAPI.Models
     {
         public Payee By { get; set; }
         public Payee To { get; set; }
-        public IEnumerable<Expense.Summary> Expenses { get; set; }
+        public IEnumerable<ExpenseSummary> Expenses { get; set; }
 
-        public class Summary
+        public static implicit operator PaymentSummary(Payment payment)
         {
-            [BsonElement("_id")]
-            [BsonRepresentation(BsonType.ObjectId)]
-            public string Id { get; set; }
-            public DateTime Date { get; set; }
-            [BsonElement("_value")]
-            [BsonRepresentation(BsonType.Decimal128)]
-            public decimal Value { get; set; }
-            public Payee By { get; set; }
-        }
-
-        public static implicit operator Summary(Payment payment)
-        {
-            return new Summary
+            return new PaymentSummary
             {
                 Id = payment.Id,
                 By = payment.By,
                 Date = payment.Date
             };
         }
+    }
+
+    public class PaymentSummary
+    {
+        [BsonElement("_id")]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string Id { get; set; }
+        public DateTime Date { get; set; }
+        [BsonElement("_value")]
+        [BsonRepresentation(BsonType.Decimal128)]
+        public decimal Value { get; set; }
+        public Payee By { get; set; }
+    }
+
+    public class PaymentUpdate
+    {
+        public string ExpenseId { get; set; }
+        public PaymentSummary Summary { get; set; }
     }
 }

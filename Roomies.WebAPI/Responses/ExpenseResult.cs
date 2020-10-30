@@ -15,7 +15,7 @@ namespace Roomies.WebAPI.Responses
 
         public ExpenseStatus Status { get; set; }
         public TransactionType Type { get; set; }
-        public IEnumerable<Payment.Summary> Payments { get; set; }
+        public IEnumerable<PaymentSummary> Payments { get; set; }
 
         // Simple
         public IEnumerable<Payer> Payers { get; set; }

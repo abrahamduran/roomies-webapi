@@ -14,7 +14,7 @@ namespace Roomies.WebAPI.Models
         public string BusinessName { get; set; }
         public Payee Payee { get; set; }
 
-        public IEnumerable<Payment.Summary> Payments { get; set; }
+        public IEnumerable<PaymentSummary> Payments { get; set; }
         public ExpenseStatus Status
         {
             get
@@ -24,30 +24,14 @@ namespace Roomies.WebAPI.Models
             }
         }
 
-        public class Summary
+        public static implicit operator ExpenseSummary(Expense expense)
         {
-            [BsonElement("_id")]
-            [BsonRepresentation(BsonType.ObjectId)]
-            public string Id { get; set; }
-            public DateTime Date { get; set; }
-            [BsonRepresentation(BsonType.Decimal128)]
-            public decimal Total { get; set; }
-        }
-
-        public static implicit operator Summary(Expense expense)
-        {
-            return new Summary
+            return new ExpenseSummary
             {
                 Id = expense.Id,
                 Date = expense.Date,
                 Total = expense.Total
             };
-        }
-
-        public class PaymentUpdate
-        {
-            public string ExpenseId { get; set; }
-            public Payment.Summary Summary { get; set; }
         }
     }
 
@@ -60,6 +44,16 @@ namespace Roomies.WebAPI.Models
     public class DetailedExpense : Expense
     {
         public IEnumerable<ExpenseItem> Items { get; set; }
+    }
+
+    public class ExpenseSummary
+    {
+        [BsonElement("_id")]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string Id { get; set; }
+        public DateTime Date { get; set; }
+        [BsonRepresentation(BsonType.Decimal128)]
+        public decimal Total { get; set; }
     }
 
     public class ExpenseItem

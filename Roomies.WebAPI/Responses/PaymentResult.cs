@@ -12,7 +12,7 @@ namespace Roomies.WebAPI.Responses
         public decimal Total { get; set; }
         public Payee By { get; set; }
         public Payee To { get; set; }
-        public IEnumerable<Expense.Summary> Expenses { get; set; }
+        public IEnumerable<ExpenseSummary> Expenses { get; set; }
 
         internal static PaymentResult ForRoommate(Payment payment) =>
             new PaymentResult

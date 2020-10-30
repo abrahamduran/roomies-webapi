@@ -13,6 +13,6 @@ namespace Roomies.WebAPI.Repositories.Interfaces
         Expense Add(Expense expense);
         ExpenseItem GetItem(string expenseId, int itemId);
         IEnumerable<ExpenseItem> GetItems(string expenseId);
-        void SetPayment(IEnumerable<Expense.PaymentUpdate> payments);
+        void SetPayment(IEnumerable<PaymentUpdate> payments);
     }
 }
