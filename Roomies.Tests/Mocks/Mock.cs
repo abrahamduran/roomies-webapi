@@ -41,9 +41,9 @@ namespace Roomies.Tests.Mocks
                     Total = total
                 };
 
-            internal static Expense.Summary ExpenseSummary(
+            internal static ExpenseSummary ExpenseSummary(
                 string id = null, DateTime? date = null, decimal total = 1)
-                => new Expense.Summary
+                => new ExpenseSummary
                 {
                     Id = id ?? Guid.NewGuid().ToString(),
                     Date = date ?? DateTime.Now,
@@ -65,7 +65,7 @@ namespace Roomies.Tests.Mocks
 
             internal static Payment Payment(string id = null, Payee by = null, Payee to = null,
                 DateTime? date = null, string description = "Lorem ipsum dolor sit amet", decimal total = 2,
-                Expense.Summary[] expenses = null)
+                ExpenseSummary[] expenses = null)
                 => new Payment
                 {
                     Id = id ?? Guid.NewGuid().ToString(),
