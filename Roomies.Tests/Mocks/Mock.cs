@@ -118,7 +118,7 @@ namespace Roomies.Tests.Mocks
             internal static RegisterExpense RegisterSimpleExpense(
                 string payeeId = null, string businessName = "Umbrella Corp", decimal total = 1,
                 DateTime? date = null, string description = "Lorem ipsum dolor sit amet",
-                RegisterExpensePayer[] payers = null, ExpenseDistribution distribution = default)
+                RegisterExpensePayer[] payers = null, ExpenseDistribution? distribution = ExpenseDistribution.Even)
                 => new RegisterExpense
                 {
                     BusinessName = businessName,

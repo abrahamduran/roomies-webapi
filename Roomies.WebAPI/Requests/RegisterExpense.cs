@@ -22,7 +22,7 @@ namespace Roomies.WebAPI.Requests
         #region Simple Expense
         [MinLength(1, ErrorMessage = "At least one payer must be selected.")]
         public IEnumerable<RegisterExpensePayer> Payers { get; set; }
-        public ExpenseDistribution Distribution { get; set; }
+        public ExpenseDistribution? Distribution { get; set; }
 
         public static implicit operator SimpleExpense(RegisterExpense registerExpense)
         {
@@ -32,7 +32,7 @@ namespace Roomies.WebAPI.Requests
                 Total = registerExpense.Total,
                 Description = registerExpense.Description,
                 BusinessName = registerExpense.BusinessName,
-                Distribution = registerExpense.Distribution
+                Distribution = registerExpense.Distribution.Value
             };
         }
         #endregion

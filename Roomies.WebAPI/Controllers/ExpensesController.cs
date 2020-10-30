@@ -126,9 +126,6 @@ namespace Roomies.WebAPI.Controllers
 
         private Expense RegisterSimpleExpense(RegisterExpense simpleExpense, Payee payee, List<Autocomplete> autocomplete)
         {
-            var entity = (SimpleExpense)simpleExpense;
-            entity.Payee = payee;
-
             #region Validations
             if (simpleExpense.Payers?.Any() != true)
             {
@@ -136,19 +133,28 @@ namespace Roomies.WebAPI.Controllers
                 return null;
             }
 
+            if (simpleExpense.Distribution == null)
+            {
+                ModelState.AddModelError("Distribution", "When registering a Simple Expense, you must specify the type of distribution.");
+                return null;
+            }
+
             #region Validate Payers
+
             // TODO: validate duplications before calling the database
             var roommates = _roommates.Get(simpleExpense.Payers.Select(x => x.Id));
             ValidatePayers(simpleExpense.Payers, roommates, payee);
             if (!ModelState.IsValid) return null;
 
-            ValidateDistribution(simpleExpense.Distribution, simpleExpense.Payers);
+            ValidateDistribution(simpleExpense.Distribution.Value, simpleExpense.Payers);
             if (!ModelState.IsValid) return null;
 
+            var entity = (SimpleExpense)simpleExpense;
+            entity.Payee = payee;
             entity.Payers = simpleExpense.Payers.Select(x => new Payer
             {
                 Id = x.Id,
-                Amount = simpleExpense.Distribution.GetAmount(simpleExpense, x),
+                Amount = simpleExpense.Distribution.Value.GetAmount(simpleExpense, x),
                 Name = roommates.Single(p => p.Id == x.Id).Name
             }).ToList();
             var total = entity.Payers.Sum(x => x.Amount);
@@ -251,7 +257,7 @@ namespace Roomies.WebAPI.Controllers
         {
             var hasInvalidPayer = payers.Any(x => x.Amount != null && x.Multiplier != null);
             if (hasInvalidPayer)
-                ModelState.AddModelError("Payers", "An Expense cannot be proportional and even at the same time. Amount and Multiplier cannot be filled at the same time. Please, select only one.");
+                ModelState.AddModelError("Payers", "An Expense cannot be proportional and custom at the same time. Amount and Multiplier cannot be filled at the same time. Please, select only one.");
 
             var hasInvalidAmount = payers.Any(x => x.Amount == null || x.Amount <= 0);
             var hasInvalidMultiplier = payers.Any(x => x.Multiplier == null || x.Multiplier > 1 || x.Multiplier <= 0) || payers.Sum(x => (float)x.Multiplier) != 1;

@@ -103,6 +103,25 @@ namespace Roomies.Tests.UnitTests
         }
 
         #region Simple Expense
+        [Fact]
+        public async Task Post_RegisterSimpleExpenseWithNullDistribution_ProducesBadRequestResult()
+        {
+            // arrange
+            var controller = new ExpensesController(_channel, _expenses, _roommates);
+            var payers = new[] { Mock.Requests.Payer() };
+            var registerExpense = Mock.Requests.RegisterSimpleExpense(distribution: null, payers: payers);
+            _roommates.Roommates = payers.Select(x => Mock.Models.Roommate(id: x.Id)).ToList();
+            _roommates.Roommate = Mock.Models.Roommate(id: registerExpense.PayeeId);
+
+            // act
+            var result = (await controller.Post(registerExpense)).Result;
+
+            // assert
+            var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+            var errors = Assert.IsAssignableFrom<SerializableError>(badRequest.Value);
+            Assert.True(errors.ContainsKey("Distribution"));
+        }
+
         [Theory, MemberData(nameof(EvenDistributions))]
         public async Task Post_RegisterSimpleExpense_DistributesEvenExpense(decimal total, decimal[] expected)
         {
