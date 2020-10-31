@@ -56,18 +56,8 @@ namespace Roomies.WebAPI.Controllers
         {
             if (ModelState.IsValid)
             {
-                #region Validate Payee
-                var roommate = _roommates.Get(expense.PayeeId);
-                if (roommate == null)
-                {
-                    ModelState.AddModelError("PayeeId", "The specified PayeeId is not valid or does not represent a registered Roommate.");
-                    return BadRequest(ModelState);
-                }
-                var payee = new Payee { Id = roommate.Id, Name = roommate.Name };
-                #endregion
-
                 List<Autocomplete> autocomplete;
-                var result = RegisterExpense(expense, payee, out autocomplete);
+                var result = RegisterExpense(expense, out autocomplete);
                 if (result != null)
                 {
                     await _channel.WriteAsync(autocomplete);
@@ -141,19 +131,48 @@ namespace Roomies.WebAPI.Controllers
             return NotFound();
         }
 
-        private Expense RegisterExpense(RegisterExpense expense, Payee payee, out List<Autocomplete> autocomplete)
+        private Expense RegisterExpense(RegisterExpense expense, out List<Autocomplete> autocomplete)
         {
             autocomplete = new List<Autocomplete>();
             autocomplete.Add(new Autocomplete { Text = expense.BusinessName, Type = AutocompleteType.BusinessName });
             if (expense.Items?.Any() == true)
-                return RegisterDetailedExpense(expense, payee, autocomplete);
+                return RegisterDetailedExpense(expense, autocomplete);
             else
-                return RegisterSimpleExpense(expense, payee, autocomplete);
+                return RegisterSimpleExpense(expense, autocomplete);
         }
 
-        private Expense RegisterSimpleExpense(RegisterExpense simpleExpense, Payee payee, List<Autocomplete> autocomplete)
+        private Expense RegisterSimpleExpense(RegisterExpense simpleExpense, List<Autocomplete> autocomplete)
         {
-            #region Validations
+            var entity = ValidateSimpleExpense(simpleExpense);
+            if (!ModelState.IsValid) return null;
+
+            if (simpleExpense.Description.Length < 31)
+                autocomplete.Add(new Autocomplete { Text = simpleExpense.Description, Type = AutocompleteType.ItemName });
+
+            var result = _expenses.Add(entity);
+            if (result != null)
+                UpdateBalances(entity.Payers, entity.Payee, entity.Total);
+
+            return result;
+        }
+
+        private Expense RegisterDetailedExpense(RegisterExpense detailedExpense, List<Autocomplete> autocomplete)
+        {
+            var entity = ValidateDetailedExpense(detailedExpense);
+            if (!ModelState.IsValid) return null;
+
+            foreach (var item in entity.Items)
+                autocomplete.Add(new Autocomplete { Text = item.Name, Type = AutocompleteType.ItemName });
+
+            var result = _expenses.Add(entity);
+            if (result != null)
+                UpdateBalances(entity.Items.SelectMany(x => x.Payers), entity.Payee, entity.Total);
+
+            return result;
+        }
+
+        private SimpleExpense ValidateSimpleExpense(RegisterExpense simpleExpense)
+        {
             if (simpleExpense.Payers?.Any() != true)
             {
                 ModelState.AddModelError("Payers", "When registering a Simple Expense, you must specify at least one Payer.");
@@ -166,16 +185,24 @@ namespace Roomies.WebAPI.Controllers
                 return null;
             }
 
-            #region Validate Payers
+            #region Validate Payers & Payee
+            var roommate = _roommates.Get(simpleExpense.PayeeId);
+            if (roommate == null)
+                ModelState.AddModelError("PayeeId", "The specified PayeeId is not valid or does not represent a registered Roommate.");
+            var payee = new Payee { Id = roommate.Id, Name = roommate.Name };
 
             // TODO: validate duplications before calling the database
             var roommates = _roommates.Get(simpleExpense.Payers.Select(x => x.Id));
-            ValidatePayers(simpleExpense.Payers, roommates, payee);
+            Validate(simpleExpense.Payers, roommates, payee);
             if (!ModelState.IsValid) return null;
+            #endregion
 
-            ValidateDistribution(simpleExpense.Distribution.Value, simpleExpense.Payers);
+            #region Validate Distribution
+            Validate(simpleExpense.Distribution.Value, simpleExpense.Payers);
             if (!ModelState.IsValid) return null;
+            #endregion
 
+            #region Parse Entity
             var entity = (SimpleExpense)simpleExpense;
             entity.Payee = payee;
             entity.Payers = simpleExpense.Payers.Select(x => new Payer
@@ -184,6 +211,9 @@ namespace Roomies.WebAPI.Controllers
                 Amount = simpleExpense.Distribution.Value.GetAmount(simpleExpense, x),
                 Name = roommates.Single(p => p.Id == x.Id).Name
             }).ToList();
+            #endregion
+
+            #region Validate Totals
             var payersTotal = entity.Payers.Sum(x => x.Amount);
             if (payersTotal != entity.Total)
             {
@@ -194,42 +224,42 @@ namespace Roomies.WebAPI.Controllers
                 return null;
             }
             #endregion
-            #endregion
 
-            if (simpleExpense.Description.Length < 31)
-                autocomplete.Add(new Autocomplete { Text = simpleExpense.Description, Type = AutocompleteType.ItemName });
-
-            var result = _expenses.Add(entity);
-            if (result != null)
-                UpdateBalances(entity.Payers, entity.Payee, entity.Total);
-
-            return result;
+            return entity;
         }
 
-        private Expense RegisterDetailedExpense(RegisterExpense detailedExpense, Payee payee, List<Autocomplete> autocomplete)
+        private DetailedExpense ValidateDetailedExpense(RegisterExpense detailedExpense)
         {
-            #region Validations
             if (detailedExpense.Items?.Any() != true)
             {
                 ModelState.AddModelError("Payers", "When registering a Detailed Expense, you must specify at least one Item.");
                 return null;
             }
 
-            #region Validate Payers
+            #region Validate Payee & Payers
+            var roommate = _roommates.Get(detailedExpense.PayeeId);
+            if (roommate == null)
+                ModelState.AddModelError("PayeeId", "The specified PayeeId is not valid or does not represent a registered Roommate.");
+            var payee = new Payee { Id = roommate.Id, Name = roommate.Name };
+
             // TODO: validate duplications before calling the database
             var payers = detailedExpense.Items.SelectMany(i => i.Payers).Distinct(new PayerEqualityComparer()).ToList();
             var ids = payers.Select(p => p.Id).ToList();
             var roommates = _roommates.Get(ids);
 
-            ValidatePayers(payers, roommates, payee);
+            Validate(payers, roommates, payee);
             if (!ModelState.IsValid) return null;
+            #endregion
 
+            #region Validate Items
             foreach (var item in detailedExpense.Items)
             {
-                ValidateDistribution(item.Distribution, item.Payers);
+                Validate(item.Distribution, item.Payers);
                 if (!ModelState.IsValid) return null;
             }
+            #endregion
 
+            #region Parse Entity
             var entity = (DetailedExpense)detailedExpense;
             entity.Payee = payee;
 
@@ -244,9 +274,11 @@ namespace Roomies.WebAPI.Controllers
                     Name = roommates.Single(x => x.Id == p.Id).Name,
                     Amount = i.Distribution.GetAmount(i, p)
                 }).ToList();
-                autocomplete.Add(new Autocomplete { Text = item.Name, Type = AutocompleteType.ItemName });
                 return item;
             }).ToList();
+            #endregion
+
+            #region Validate Totals
             var itemsTotal = entity.Items.Sum(x => x.Total);
             if (itemsTotal != entity.Total)
             {
@@ -266,16 +298,11 @@ namespace Roomies.WebAPI.Controllers
                 return null;
             }
             #endregion
-            #endregion
 
-            var result = _expenses.Add(entity);
-            if (result != null)
-                UpdateBalances(entity.Items.SelectMany(x => x.Payers), entity.Payee, entity.Total);
-
-            return result;
+            return entity;
         }
 
-        private void ValidatePayers(IEnumerable<RegisterExpensePayer> payers, IEnumerable<Roommate> roommates, Payee payee)
+        private void Validate(IEnumerable<RegisterExpensePayer> payers, IEnumerable<Roommate> roommates, Payee payee)
         {
             if (!payers.Any() || payers.Count() != roommates.Count())
                 ModelState.AddModelError("Payers", "At least one Payer is invalid, does not represent a registered Roommate, or is duplicated.");
@@ -287,7 +314,7 @@ namespace Roomies.WebAPI.Controllers
             }
         }
 
-        private void ValidateDistribution(ExpenseDistribution distribution, IEnumerable<RegisterExpensePayer> payers)
+        private void Validate(ExpenseDistribution distribution, IEnumerable<RegisterExpensePayer> payers)
         {
             var hasInvalidPayer = payers.Any(x => x.Amount != null && x.Multiplier != null);
             if (hasInvalidPayer)
