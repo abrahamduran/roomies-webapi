@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net.Mime;
 using System.Threading.Channels;
@@ -179,9 +180,6 @@ namespace Roomies.WebAPI.Controllers
 
         private Expense RegisterDetailedExpense(RegisterExpense detailedExpense, Payee payee, List<Autocomplete> autocomplete)
         {
-            var entity = (DetailedExpense)detailedExpense;
-            entity.Payee = payee;
-
             #region Validations
             if (detailedExpense.Items?.Any() != true)
             {
@@ -191,17 +189,21 @@ namespace Roomies.WebAPI.Controllers
 
             #region Validate Payers
             // TODO: validate duplications before calling the database
-            var ids = detailedExpense.Items.SelectMany(i => i.Payers.Select(p => p.Id)).Distinct();
+            var payers = detailedExpense.Items.SelectMany(i => i.Payers).Distinct(new PayerEqualityComparer()).ToList();
+            var ids = payers.Select(p => p.Id).ToList();
             var roommates = _roommates.Get(ids);
+
+            ValidatePayers(payers, roommates, payee);
+            if (!ModelState.IsValid) return null;
 
             foreach (var item in detailedExpense.Items)
             {
-                ValidatePayers(item.Payers, roommates, payee);
-                if (!ModelState.IsValid) return null;
-
                 ValidateDistribution(item.Distribution, item.Payers);
                 if (!ModelState.IsValid) return null;
             }
+
+            var entity = (DetailedExpense)detailedExpense;
+            entity.Payee = payee;
 
             var itemId = 1;
             entity.Items = detailedExpense.Items.Select(i =>
@@ -286,6 +288,14 @@ namespace Roomies.WebAPI.Controllers
                 _roommates.UpdateBalance(payee.Id, -total + payeeAmount);
             else
                 _roommates.UpdateBalance(payee.Id, -total);
+        }
+
+
+        private class PayerEqualityComparer : IEqualityComparer<RegisterExpensePayer>
+        {
+            public bool Equals([AllowNull] RegisterExpensePayer x, [AllowNull] RegisterExpensePayer y) => x?.Id == y?.Id;
+
+            public int GetHashCode([DisallowNull] RegisterExpensePayer obj) => obj.Id.GetHashCode();
         }
     }
 }

@@ -957,6 +957,35 @@ namespace Roomies.Tests.UnitTests
             var errors = Assert.IsAssignableFrom<SerializableError>(badRequest.Value);
             Assert.True(errors.ContainsKey("Payers"));
         }
+
+        [Fact]
+        public async Task Post_RegisterDetailedExpenseWithMultipleItemsAndASelfExpense_ReturnsRegisteredExpense()
+        {
+            // arrange
+            var controller = new ExpensesController(_channel, _expenses, _roommates);
+            var payee = Mock.Models.Roommate(balance: 0);
+            var payer = Mock.Models.Roommate();
+            var payers = new[] {
+                Mock.Requests.Payer(id: payee.Id),
+                Mock.Requests.Payer(id: payer.Id)
+            };
+            var items = new[] {
+                Mock.Requests.ExpenseItem(payers: new[] { Mock.Requests.Payer(id: payee.Id) }),
+                Mock.Requests.ExpenseItem(payers: payers)
+            };
+            var registerExpense = Mock.Requests.RegisterDetailedExpense(payeeId: payee.Id, items: items, total: items.Sum(x => x.Total));
+            _roommates.Roommates = new[] { payee, payer }.ToList();
+            _roommates.Roommate = payee;
+
+            // act
+            var result = (await controller.Post(registerExpense)).Result;
+
+            // assert
+            var created = Assert.IsType<CreatedAtActionResult>(result);
+            Assert.IsAssignableFrom<DetailedExpense>(created.Value);
+            Assert.Equal(-0.5M, payee.Balance);
+        }
+
         #endregion
 
         #region MemberData
