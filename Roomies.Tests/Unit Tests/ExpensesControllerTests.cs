@@ -196,6 +196,7 @@ namespace Roomies.Tests.UnitTests
             // assert
             var badRequest = Assert.IsType<BadRequestObjectResult>(result);
             var errors = Assert.IsAssignableFrom<SerializableError>(badRequest.Value);
+            Assert.Equal(4, errors.Values.SelectMany(x => (string[])x).Count());
             Assert.True(errors.ContainsKey("Total"));
             Assert.True(errors.ContainsKey("Payers"));
         }
@@ -622,8 +623,32 @@ namespace Roomies.Tests.UnitTests
             // assert
             var badRequest = Assert.IsType<BadRequestObjectResult>(result);
             var errors = Assert.IsAssignableFrom<SerializableError>(badRequest.Value);
+            Assert.Equal(4, errors.Values.SelectMany(x => (string[])x).Count());
             Assert.True(errors.ContainsKey("Total"));
             Assert.True(errors.ContainsKey("Payers"));
+        }
+
+        [Fact]
+        public async Task Post_RegisterDetailedExpenseWithIncorrectTotalPerItem_ReturnsBadRequest()
+        {
+            // arrange
+            var controller = new ExpensesController(_channel, _expenses, _roommates);
+            var total = 2000M;
+            var payers = new[] { Mock.Requests.Payer(amount: total) };
+            var items = new[] { Mock.Requests.ExpenseItem(payers: payers, distribution: ExpenseDistribution.Custom, price: 120) };
+            var registerExpense = Mock.Requests.RegisterDetailedExpense(total: total, items: items);
+            _roommates.Roommates = payers.Select(x => Mock.Models.Roommate(id: x.Id)).ToList();
+            _roommates.Roommate = Mock.Models.Roommate(id: registerExpense.PayeeId);
+
+            // act
+            var result = (await controller.Post(registerExpense)).Result;
+
+            // assert
+            var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+            var errors = Assert.IsAssignableFrom<SerializableError>(badRequest.Value);
+            Assert.Equal(4, errors.Values.SelectMany(x => (string[])x).Count());
+            Assert.True(errors.ContainsKey("Total"));
+            Assert.True(errors.ContainsKey("Items"));
         }
 
         [Fact]

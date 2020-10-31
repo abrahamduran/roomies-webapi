@@ -158,11 +158,13 @@ namespace Roomies.WebAPI.Controllers
                 Amount = simpleExpense.Distribution.Value.GetAmount(simpleExpense, x),
                 Name = roommates.Single(p => p.Id == x.Id).Name
             }).ToList();
-            var total = entity.Payers.Sum(x => x.Amount);
-            if (total != simpleExpense.Total)
+            var payersTotal = entity.Payers.Sum(x => x.Amount);
+            if (payersTotal != entity.Total)
             {
                 ModelState.AddModelError("Total", "The total amount for this expense and the total amount by payers' distribution differ.");
+                ModelState.AddModelError("Total", $"Invoice total: {entity.Total}");
                 ModelState.AddModelError("Payers", "The total amount for this expense and the total amount by payers' distribution differ.");
+                ModelState.AddModelError("Payers", $"Payer's total: {payersTotal}.");
                 return null;
             }
             #endregion
@@ -223,14 +225,18 @@ namespace Roomies.WebAPI.Controllers
             if (itemsTotal != entity.Total)
             {
                 ModelState.AddModelError("Items", "The total amount for this expense and the total amount by items differ.");
+                ModelState.AddModelError("Items", $"Item's total: {itemsTotal}.");
                 ModelState.AddModelError("Total", "The total amount for this expense and the total amount by items differ.");
+                ModelState.AddModelError("Total", $"Invoice total: {entity.Total}");
                 return null;
             }
-            var total = entity.Items.Sum(i => i.Payers.Sum(p => p.Amount));
-            if (total != detailedExpense.Total)
+            var payersTotal = entity.Items.Sum(i => i.Payers.Sum(p => p.Amount));
+            if (payersTotal != entity.Total)
             {
-                ModelState.AddModelError("Total", "The  total amount for this expense and the total amount by payers' distribution differ.");
-                ModelState.AddModelError("Payers", "The  total amount for this expense and the total amount by payers' distribution differ.");
+                ModelState.AddModelError("Total", "The total amount for this expense and the total amount by payers' distribution differ.");
+                ModelState.AddModelError("Total", $"Invoice total: {entity.Total}");
+                ModelState.AddModelError("Payers", "The total amount for this expense and the total amount by payers' distribution differ.");
+                ModelState.AddModelError("Payers", $"Payer's total: {payersTotal}.");
                 return null;
             }
             #endregion
