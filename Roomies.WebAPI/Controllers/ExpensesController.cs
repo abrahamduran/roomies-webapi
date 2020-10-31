@@ -74,8 +74,68 @@ namespace Roomies.WebAPI.Controllers
         //{
         //}
 
+        // PUT api/expenses/{id}
+        [HttpPut("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(Dictionary<string, string[]>), StatusCodes.Status400BadRequest)]
+        public ActionResult Put(string id, [FromBody] RegisterExpense expense)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            // validate expense
+            Func<Expense> validation;
+            if (expense.Items?.Any() == true)
+                validation = () => ValidateDetailedExpense(expense);
+            else
+                validation = () => ValidateSimpleExpense(expense);
+
+            // get database's entity
+            var oldEntity = _expenses.Get(id);
+            if (oldEntity == null) return NotFound();
+            var newEntity = validation();
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            // restore balances to state before the expense
+            Func<Expense, IEnumerable<Payer>> getPayers = (expense) =>
+            {
+                if (expense is SimpleExpense simple) return simple.Payers;
+                else if (expense is DetailedExpense detailed) return detailed.Items.SelectMany(x => x.Payers);
+                return null;
+            };
+            Func<Payer, Payer> invertAmount = (payer) => { payer.Amount *= -1; return payer; };
+            var oldPayers = getPayers(oldEntity).Select(invertAmount).ToList();
+            UpdateBalances(oldPayers, oldEntity.Payee, -oldEntity.Total);
+
+            // update balances with new expense
+            var newPayers = getPayers(newEntity).ToList();
+            UpdateBalances(newPayers, newEntity.Payee, newEntity.Total);
+
+            // update expense in database (replace whole document, except the _id)
+            newEntity.Id = oldEntity.Id;
+            var isReplaced = _expenses.Replace(newEntity);
+
+            // if update fails, rollback balances
+            if (isReplaced)
+                return NoContent();
+            else
+            {
+                // rollback balances
+                newPayers = newPayers.Select(invertAmount).ToList();
+                UpdateBalances(newPayers, newEntity.Payee, -newEntity.Total);
+
+                oldPayers = oldPayers.Select(invertAmount).ToList();
+                UpdateBalances(oldPayers, oldEntity.Payee, oldEntity.Total);
+
+                throw new ApplicationException("Something wrong has happened. The expense could not be replaced.");
+            }
+        }
+
         // DELETE api/expenses/{id}
         [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public ActionResult Delete(string id)
         {
             var expense = _expenses.Get(id);
