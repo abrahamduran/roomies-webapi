@@ -99,5 +99,8 @@ namespace Roomies.WebAPI.Repositories.Implementations
             _transactions.InsertOne(transaction);
             return transaction;
         }
+
+        bool IExpensesRepository.Remove(Expense expense)
+            => _transactions.OfType<Expense>().DeleteOne(x => x.Id == expense.Id).DeletedCount > 0;
     }
 }

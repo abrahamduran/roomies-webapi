@@ -11,6 +11,7 @@ namespace Roomies.WebAPI.Repositories.Interfaces
         IEnumerable<Expense> Get(IEnumerable<string> expenseIds);
         IEnumerable<Expense> Get(Roommate roommate);
         Expense Add(Expense expense);
+        bool Remove(Expense expense);
         ExpenseItem GetItem(string expenseId, int itemId);
         IEnumerable<ExpenseItem> GetItems(string expenseId);
         void SetPayment(IEnumerable<PaymentUpdate> payments);

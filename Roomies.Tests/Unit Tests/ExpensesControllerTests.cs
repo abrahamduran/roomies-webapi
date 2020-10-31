@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -539,6 +540,65 @@ namespace Roomies.Tests.UnitTests
             var errors = Assert.IsAssignableFrom<SerializableError>(badRequest.Value);
             Assert.True(errors.ContainsKey("Payers"));
         }
+
+        [Fact]
+        public void Delete_InvalidSimpleExpense_ProducesNotFoundResult()
+        {
+            // arrange
+            var controller = new ExpensesController(_channel, _expenses, _roommates);
+
+            // act
+            var result = controller.Delete("");
+
+            // assert
+            Assert.IsType<NotFoundResult>(result);
+        }
+
+        [Fact]
+        public void Delete_SimpleExpense_RestoresRoommatesBalances()
+        {
+            // arrange
+            var expected = new[] { 0M, 0M, 0M };
+            var controller = new ExpensesController(_channel, _expenses, _roommates);
+            var roommates = new[] { Mock.Models.Roommate(balance: -100), Mock.Models.Roommate(balance: 50), Mock.Models.Roommate(balance: 50) };
+            var payee = Mock.Models.Payee(id: roommates[0].Id);
+            var payers = roommates.Skip(1).Select(x => Mock.Models.Payer(id: x.Id, amount: 50)).ToArray();
+            var expense = Mock.Models.SimpleExpense(total: 100, payers: payers, payee: payee);
+            _expenses.Expense = expense;
+            _expenses.SuccessfulDelete = true;
+            _roommates.Roommate = roommates[0];
+            _roommates.Roommates = roommates.Skip(1);
+
+            // act
+            var result = controller.Delete(expense.Id);
+
+            // assert
+            Assert.IsType<NoContentResult>(result);
+            Assert.Equal(expected, roommates.Select(x => x.Balance).ToArray());
+        }
+
+        [Fact]
+        public void Delete_SimpleExpense_RollbackRoommatesBalances_WhenUnsuccessfulDelete()
+        {
+            // arrange
+            var expected = new[] { -100M, 50M, 50M };
+            var controller = new ExpensesController(_channel, _expenses, _roommates);
+            var roommates = new[] { Mock.Models.Roommate(balance: -100), Mock.Models.Roommate(balance: 50), Mock.Models.Roommate(balance: 50) };
+            var payee = Mock.Models.Payee(id: roommates[0].Id);
+            var payers = roommates.Skip(1).Select(x => Mock.Models.Payer(id: x.Id, amount: 50)).ToArray();
+            var expense = Mock.Models.SimpleExpense(total: 100, payers: payers, payee: payee);
+            _expenses.Expense = expense;
+            _expenses.SuccessfulDelete = false;
+            _roommates.Roommate = roommates[0];
+            _roommates.Roommates = roommates.Skip(1);
+
+            // act
+            Action action = () => controller.Delete(expense.Id);
+
+            // assert
+            Assert.Throws<ApplicationException>(action);
+            Assert.Equal(expected, roommates.Select(x => x.Balance).ToArray());
+        }
         #endregion
 
         #region Detailed Expense
@@ -1011,6 +1071,53 @@ namespace Roomies.Tests.UnitTests
             Assert.Equal(-0.5M, payee.Balance);
         }
 
+        [Fact]
+        public void Delete_DetailedExpense_RestoresRoommatesBalances()
+        {
+            // arrange
+            var expected = new[] { 0M, 0M, 0M };
+            var controller = new ExpensesController(_channel, _expenses, _roommates);
+            var roommates = new[] { Mock.Models.Roommate(balance: -100), Mock.Models.Roommate(balance: 50), Mock.Models.Roommate(balance: 50) };
+            var payee = Mock.Models.Payee(id: roommates[0].Id);
+            var payers = roommates.Skip(1).Select(x => Mock.Models.Payer(id: x.Id, amount: 50)).ToArray();
+            var items = new[] { Mock.Models.ExpenseItem(payers: payers, price: 100) };
+            var expense = Mock.Models.DetailedExpense(total: 100, items: items, payee: payee);
+            _expenses.Expense = expense;
+            _expenses.SuccessfulDelete = true;
+            _roommates.Roommate = roommates[0];
+            _roommates.Roommates = roommates.Skip(1);
+
+            // act
+            var result = controller.Delete(expense.Id);
+
+            // assert
+            Assert.IsType<NoContentResult>(result);
+            Assert.Equal(expected, roommates.Select(x => x.Balance).ToArray());
+        }
+
+        [Fact]
+        public void Delete_DetailedExpense_RollbackRoommatesBalances_WhenUnsuccessfulDelete()
+        {
+            // arrange
+            var expected = new[] { -100M, 50M, 50M };
+            var controller = new ExpensesController(_channel, _expenses, _roommates);
+            var roommates = new[] { Mock.Models.Roommate(balance: -100), Mock.Models.Roommate(balance: 50), Mock.Models.Roommate(balance: 50) };
+            var payee = Mock.Models.Payee(id: roommates[0].Id);
+            var payers = roommates.Skip(1).Select(x => Mock.Models.Payer(id: x.Id, amount: 50)).ToArray();
+            var items = new[] { Mock.Models.ExpenseItem(payers: payers, price: 100) };
+            var expense = Mock.Models.DetailedExpense(total: 100, items: items, payee: payee);
+            _expenses.Expense = expense;
+            _expenses.SuccessfulDelete = false;
+            _roommates.Roommate = roommates[0];
+            _roommates.Roommates = roommates.Skip(1);
+
+            // act
+            Action action = () => controller.Delete(expense.Id);
+
+            // assert
+            Assert.Throws<ApplicationException>(action);
+            Assert.Equal(expected, roommates.Select(x => x.Balance).ToArray());
+        }
         #endregion
 
         #region MemberData

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -83,11 +84,36 @@ namespace Roomies.WebAPI.Controllers
         //{
         //}
 
-        //// DELETE api/expenses/{id}
-        //[HttpDelete("{id}")]
-        //public void Delete(int id)
-        //{
-        //}
+        // DELETE api/expenses/{id}
+        [HttpDelete("{id}")]
+        public ActionResult Delete(string id)
+        {
+            var expense = _expenses.Get(id);
+            if (expense == null) return NotFound();
+
+            IEnumerable<Payer> payers;
+            if (expense is SimpleExpense simple)
+                payers = simple.Payers;
+            else if (expense is DetailedExpense detailed)
+                payers = detailed.Items.SelectMany(x => x.Payers);
+            else throw new ApplicationException("Something wrong has happened. An unpredicted condition has appeared.");
+
+            Func<Payer, Payer> invertAmount = (payer) => { payer.Amount *= -1; return payer; };
+            payers = payers.Select(invertAmount).ToList();
+            UpdateBalances(payers, expense.Payee, -expense.Total);
+            var isRemoved = _expenses.Remove(expense);
+
+            if (isRemoved)
+                return NoContent();
+            else
+            {
+                // rollback balances
+                payers = payers.Select(invertAmount).ToList();
+                UpdateBalances(payers, expense.Payee, expense.Total);
+
+                throw new ApplicationException("Something wrong has happened. The expense could not be deleted.");
+            }
+        }
 
         // GET: api/expenses/{expenseId}/items
         [ProducesResponseType(StatusCodes.Status200OK)]
