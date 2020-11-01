@@ -93,6 +93,12 @@ namespace Roomies.WebAPI.Controllers
             // get database's entity
             var oldEntity = _expenses.Get(id);
             if (oldEntity == null) return NotFound();
+            if (oldEntity.Payments?.Any() == true)
+            {
+                ModelState.AddModelError("Payments", "The Expense you are trying to modified has been locked due to its payment status.");
+                ModelState.AddModelError("Payments", "An Expense with registered payments cannot be modified.");
+                return BadRequest(ModelState);
+            }
             var newEntity = validation();
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
@@ -140,6 +146,12 @@ namespace Roomies.WebAPI.Controllers
         {
             var expense = _expenses.Get(id);
             if (expense == null) return NotFound();
+            if (expense.Payments?.Any() == true)
+            {
+                ModelState.AddModelError("Payments", "The Expense you are trying to delete has been locked due to its payment status.");
+                ModelState.AddModelError("Payments", "An Expense with registered payments cannot be deleted.");
+                return BadRequest(ModelState);
+            }
 
             IEnumerable<Payer> payers;
             if (expense is SimpleExpense simple)

@@ -9,10 +9,10 @@ namespace Roomies.Tests.Mocks
         internal static class Models
         {
             internal static SimpleExpense SimpleExpense(
-                string id = null, string businessName = "Umbrella Corp",
+                string id = null, string businessName = "Umbrella Corp", decimal total = 1,
                 DateTime? date = null, string description = "Lorem ipsum dolor sit amet",
                 ExpenseDistribution distribution = default, Payee payee = null,
-                Payer[] payers = null, ExpenseStatus status = default, decimal total = 1)
+                Payer[] payers = null, PaymentSummary[] payments = null)
                 => new SimpleExpense
                 {
                     Id = id ?? Guid.NewGuid().ToString(),
@@ -22,14 +22,14 @@ namespace Roomies.Tests.Mocks
                     Distribution = distribution,
                     Payee = payee ?? Payee(),
                     Payers = payers ?? new[] { Payer(), Payer(name: "Doctor Foreman") },
+                    Payments = payments,
                     Total = total
                 };
 
             internal static DetailedExpense DetailedExpense(
-                string id = null, string businessName = "Umbrella Corp",
+                string id = null, string businessName = "Umbrella Corp", decimal total = 1,
                 DateTime? date = null, string description = "Lorem ipsum dolor sit amet",
-                Payee payee = null, ExpenseItem[] items = null,
-                ExpenseStatus status = default, decimal total = 1)
+                Payee payee = null, ExpenseItem[] items = null, PaymentSummary[] payments = null)
                 => new DetailedExpense
                 {
                     Id = id ?? Guid.NewGuid().ToString(),
@@ -38,6 +38,7 @@ namespace Roomies.Tests.Mocks
                     Description = description,
                     Payee = payee ?? Payee(),
                     Items = items ?? new[] { ExpenseItem() },
+                    Payments = payments,
                     Total = total
                 };
 
@@ -75,6 +76,17 @@ namespace Roomies.Tests.Mocks
                     Description = description,
                     Total = total,
                     Expenses = expenses ?? new[] { ExpenseSummary(), ExpenseSummary() }
+                };
+
+            internal static PaymentSummary PaymentSummary(
+                string id = null, DateTime? date = null, decimal value = 1,
+                Payee by = null)
+                => new PaymentSummary
+                {
+                    Id = id ?? Guid.NewGuid().ToString(),
+                    Date = date ?? DateTime.Now,
+                    By = by ?? Payee(),
+                    Value = value
                 };
 
             internal static Payee Payee(string id = null, string name = "Jack Napier")

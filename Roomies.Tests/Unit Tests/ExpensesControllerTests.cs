@@ -814,6 +814,26 @@ namespace Roomies.Tests.UnitTests
         }
 
         [Fact]
+        public void Put_SimpleExpenseWithPayments_ProducesBadRequest()
+        {
+            // arrange
+            var controller = new ExpensesController(_channel, _expenses, _roommates);
+            var payers = new[] { Mock.Requests.Payer(multiplier: .5), Mock.Requests.Payer(multiplier: .4) };
+            var registerExpense = Mock.Requests.RegisterSimpleExpense(payers: payers, distribution: ExpenseDistribution.Proportional);
+            _roommates.Roommates = payers.Select(x => Mock.Models.Roommate(id: x.Id)).ToList();
+            _roommates.Roommate = Mock.Models.Roommate(id: registerExpense.PayeeId);
+            _expenses.Expense = Mock.Models.SimpleExpense(payments: new[] { Mock.Models.PaymentSummary() });
+
+            // act
+            var result = controller.Put(_expenses.Expense.Id, registerExpense);
+
+            // assert
+            var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+            var errors = Assert.IsAssignableFrom<SerializableError>(badRequest.Value);
+            Assert.True(errors.ContainsKey("Payments"));
+        }
+
+        [Fact]
         public void Put_SimpleExpense_ShouldMatchTotalWithRegisteredExpenseTotal()
         {
             // arrange
@@ -1513,6 +1533,30 @@ namespace Roomies.Tests.UnitTests
             // assert
             Assert.IsType<NoContentResult>(result);
             Assert.Equal(expected, roommates.Select(x => x.Balance).ToArray());
+        }
+
+        [Fact]
+        public void Delete_DetailedExpenseWithPayments_ProducesBadRequests()
+        {
+            // arrange
+            var expected = new[] { 0M, 0M, 0M };
+            var controller = new ExpensesController(_channel, _expenses, _roommates);
+            var roommates = new[] { Mock.Models.Roommate(balance: -100), Mock.Models.Roommate(balance: 50), Mock.Models.Roommate(balance: 50) };
+            var payee = Mock.Models.Payee(id: roommates[0].Id);
+            var payers = roommates.Skip(1).Select(x => Mock.Models.Payer(id: x.Id, amount: 50)).ToArray();
+            var items = new[] { Mock.Models.ExpenseItem(payers: payers, price: 100) };
+            var expense = Mock.Models.DetailedExpense(total: 100, items: items, payee: payee, payments: new[] { Mock.Models.PaymentSummary() });
+            _expenses.Expense = expense;
+            _roommates.Roommate = roommates[0];
+            _roommates.Roommates = roommates.Skip(1);
+
+            // act
+            var result = controller.Delete(expense.Id);
+
+            // assert
+            var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+            var errors = Assert.IsAssignableFrom<SerializableError>(badRequest.Value);
+            Assert.True(errors.ContainsKey("Payments"));
         }
 
         [Fact]
