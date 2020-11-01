@@ -103,7 +103,7 @@ namespace Roomies.WebAPI.Repositories.Implementations
         bool IExpensesRepository.Remove(Expense expense)
             => _transactions.OfType<Expense>().DeleteOne(x => x.Id == expense.Id).DeletedCount > 0;
 
-        bool IExpensesRepository.Replace(Expense expense)
+        bool IExpensesRepository.Update(Expense expense)
             => _transactions.OfType<Expense>().ReplaceOne(x => x.Id == expense.Id, expense).ModifiedCount > 0;
     }
 }

@@ -6,6 +6,7 @@ using System.Net.Mime;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Roomies.WebAPI.Extensions;
 using Roomies.WebAPI.Models;
@@ -68,11 +69,66 @@ namespace Roomies.WebAPI.Controllers
             return BadRequest(ModelState);
         }
 
-        //// PUT api/expenses/{id}
-        //[HttpPut("{id}")]
-        //public void Put(int id, [FromBody] string value)
-        //{
-        //}
+        // TODO: part of the patch update and the put update can be reused
+        // PATCH api/expenses/{id}
+        [HttpPatch("{id}")]
+        [ProducesResponseType(typeof(Dictionary<string, string[]>), StatusCodes.Status400BadRequest)]
+        public ActionResult Patch(string id, [FromBody] JsonPatchDocument<RegisterExpense> patch)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            // get database's entity
+            var entity = _expenses.Get(id);
+            if (entity == null) return NotFound();
+            if (entity.Payments?.Any() == true)
+            {
+                ModelState.AddModelError("Payments", "The Expense you are trying to modified has been locked due to its payment status.");
+                ModelState.AddModelError("Payments", "An Expense with registered payments cannot be modified.");
+                return BadRequest(ModelState);
+            }
+
+            // update specified fields
+            var model = Requests.RegisterExpense.From(entity);
+            patch.ApplyTo(model);
+
+            // validate expense
+            var expense = ValidateExpense(model);
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            // restore balances to state before the expense
+            Func<Expense, IEnumerable<Payer>> getPayers = (expense) =>
+            {
+                if (expense is SimpleExpense simple) return simple.Payers;
+                else if (expense is DetailedExpense detailed) return detailed.Items.SelectMany(x => x.Payers);
+                return null;
+            };
+            Func<Payer, Payer> invertAmount = (payer) => { payer.Amount *= -1; return payer; };
+            var oldPayers = getPayers(entity).Select(invertAmount).ToList();
+            UpdateBalances(oldPayers, entity.Payee, -entity.Total);
+
+            // update balances with new expense
+            var newPayers = getPayers(expense).ToList();
+            UpdateBalances(newPayers, expense.Payee, expense.Total);
+
+            // update expense in database
+            expense.Id = entity.Id;
+            var isUpdated = _expenses.Update(expense);
+
+            // if update fails, rollback balances
+            if (isUpdated)
+                return NoContent();
+            else
+            {
+                // rollback balances
+                newPayers = newPayers.Select(invertAmount).ToList();
+                UpdateBalances(newPayers, expense.Payee, -expense.Total);
+
+                oldPayers = oldPayers.Select(invertAmount).ToList();
+                UpdateBalances(oldPayers, entity.Payee, entity.Total);
+
+                throw new ApplicationException("Something wrong has happened. The expense could not be updated.");
+            }
+        }
 
         // PUT api/expenses/{id}
         [HttpPut("{id}")]
@@ -83,13 +139,6 @@ namespace Roomies.WebAPI.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            // validate expense
-            Func<Expense> validation;
-            if (expense.Items?.Any() == true)
-                validation = () => ValidateDetailedExpense(expense);
-            else
-                validation = () => ValidateSimpleExpense(expense);
-
             // get database's entity
             var oldEntity = _expenses.Get(id);
             if (oldEntity == null) return NotFound();
@@ -99,7 +148,9 @@ namespace Roomies.WebAPI.Controllers
                 ModelState.AddModelError("Payments", "An Expense with registered payments cannot be modified.");
                 return BadRequest(ModelState);
             }
-            var newEntity = validation();
+
+            // validate expense
+            var newEntity = ValidateExpense(expense);
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
             // restore balances to state before the expense
@@ -119,10 +170,10 @@ namespace Roomies.WebAPI.Controllers
 
             // update expense in database (replace whole document, except the _id)
             newEntity.Id = oldEntity.Id;
-            var isReplaced = _expenses.Replace(newEntity);
+            var isUpdated = _expenses.Update(newEntity);
 
             // if update fails, rollback balances
-            if (isReplaced)
+            if (isUpdated)
                 return NoContent();
             else
             {
@@ -133,7 +184,7 @@ namespace Roomies.WebAPI.Controllers
                 oldPayers = oldPayers.Select(invertAmount).ToList();
                 UpdateBalances(oldPayers, oldEntity.Payee, oldEntity.Total);
 
-                throw new ApplicationException("Something wrong has happened. The expense could not be replaced.");
+                throw new ApplicationException("Something wrong has happened. The expense could not be updated.");
             }
         }
 
@@ -241,6 +292,14 @@ namespace Roomies.WebAPI.Controllers
                 UpdateBalances(entity.Items.SelectMany(x => x.Payers), entity.Payee, entity.Total);
 
             return result;
+        }
+
+        private Expense ValidateExpense(RegisterExpense expense)
+        {
+            if (expense.Items?.Any() == true)
+                return ValidateDetailedExpense(expense);
+            else
+                return ValidateSimpleExpense(expense);
         }
 
         private SimpleExpense ValidateSimpleExpense(RegisterExpense simpleExpense)

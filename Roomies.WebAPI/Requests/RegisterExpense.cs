@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using Roomies.WebAPI.Models;
 
 namespace Roomies.WebAPI.Requests
@@ -52,6 +53,51 @@ namespace Roomies.WebAPI.Requests
             };
         }
         #endregion
+
+        public static RegisterExpense From(Expense expense)
+        {
+            if (expense is SimpleExpense simple)
+                return From(simple);
+            if (expense is DetailedExpense detailed)
+                return From(detailed);
+            return null;
+
+        }
+
+        public static RegisterExpense From(SimpleExpense simple)
+        {
+            //! simple.Id;
+            //~ simple.Payee;
+            //~ simple.Payers;
+            //! simple.Payments;
+            return new RegisterExpense
+            {
+                BusinessName = simple.BusinessName,
+                Date = simple.Date,
+                Description = simple.Description,
+                Distribution = simple.Distribution,
+                PayeeId = simple.Payee.Id,
+                Payers = simple.Payers.Select(x => RegisterExpensePayer.From(x, simple.Distribution, simple.Total)).ToList(),
+                Total = simple.Total
+            };
+        }
+
+        public static RegisterExpense From(DetailedExpense detailed)
+        {
+            //! detailed.Id
+            //~ detailed.Items
+            //~ detailed.Payee
+            //! detailed.Payments
+            return new RegisterExpense
+            {
+                BusinessName = detailed.BusinessName,
+                Date = detailed.Date,
+                Description = detailed.Description,
+                PayeeId = detailed.Payee.Id,
+                Items = detailed.Items.Select(i => RegisterExpenseItem.From(i)).ToList(),
+                Total = detailed.Total
+            };
+        }
     }
 
     public class RegisterExpensePayer
@@ -63,6 +109,23 @@ namespace Roomies.WebAPI.Requests
         public decimal? Amount { get; set; }
         [Range(0, 1, ErrorMessage = "Please enter a value between 0 and 1.")]
         public double? Multiplier { get; set; }
+
+        public static RegisterExpensePayer From(Payer payer, ExpenseDistribution distribution, decimal total)
+        {
+            (decimal? amount, double? multiplier) = (null, null);
+            switch (distribution)
+            {
+                case ExpenseDistribution.Custom: amount = payer.Amount; break;
+                case ExpenseDistribution.Proportional: multiplier = (double)(payer.Amount / total); break;
+                default: break;
+            }
+            return new RegisterExpensePayer
+            {
+                Id = payer.Id,
+                Amount = amount,
+                Multiplier = multiplier
+            };
+        }
     }
 
     public class RegisterExpenseItem
@@ -89,6 +152,18 @@ namespace Roomies.WebAPI.Requests
                 Price = expenseItem.Price,
                 Quantity = expenseItem.Quantity,
                 Distribution = expenseItem.Distribution
+            };
+        }
+
+        public static RegisterExpenseItem From(ExpenseItem item)
+        {
+            return new RegisterExpenseItem
+            {
+                Distribution = item.Distribution,
+                Name = item.Name,
+                Price = item.Price,
+                Quantity = item.Quantity,
+                Payers = item.Payers.Select(x => RegisterExpensePayer.From(x, item.Distribution, item.Total)).ToList()
             };
         }
     }

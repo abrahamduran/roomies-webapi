@@ -12,7 +12,7 @@ namespace Roomies.WebAPI.Repositories.Interfaces
         IEnumerable<Expense> Get(Roommate roommate);
         Expense Add(Expense expense);
         bool Remove(Expense expense);
-        bool Replace(Expense expense);
+        bool Update(Expense expense);
         ExpenseItem GetItem(string expenseId, int itemId);
         IEnumerable<ExpenseItem> GetItems(string expenseId);
         void SetPayment(IEnumerable<PaymentUpdate> payments);
