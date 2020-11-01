@@ -181,7 +181,7 @@ namespace Roomies.Tests.UnitTests
         }
 
         [Fact]
-        public async Task Post_RegisterSimpleExpenseWithIncorrectTotal_ReturnsBadRequest()
+        public async Task Post_RegisterSimpleExpenseWithIncorrectTotal_ProducesBadRequest()
         {
             // arrange
             var controller = new ExpensesController(_channel, _expenses, _roommates);
@@ -252,7 +252,7 @@ namespace Roomies.Tests.UnitTests
         }
 
         [Fact]
-        public async Task Post_RegisterSimpleExpenseWithNoPayers_ReturnsBadRequests()
+        public async Task Post_RegisterSimpleExpenseWithNoPayers_ProducesBadRequests()
         {
             // arrange
             var controller = new ExpensesController(_channel, _expenses, _roommates);
@@ -269,7 +269,7 @@ namespace Roomies.Tests.UnitTests
         }
 
         [Fact]
-        public async Task Post_RegisterSimpleExpenseWithSelfExpenses_ReturnsBadRequests()
+        public async Task Post_RegisterSimpleExpenseWithSelfExpenses_ProducesBadRequests()
         {
             // arrange
             var controller = new ExpensesController(_channel, _expenses, _roommates);
@@ -290,7 +290,7 @@ namespace Roomies.Tests.UnitTests
         }
 
         [Fact]
-        public async Task Post_RegisterSimpleExpense_PayerWithAmountAndMultiplier_ReturnsBadRequests()
+        public async Task Post_RegisterSimpleExpense_PayerWithAmountAndMultiplier_ProducesBadRequests()
         {
             // arrange
             var controller = new ExpensesController(_channel, _expenses, _roommates);
@@ -409,7 +409,7 @@ namespace Roomies.Tests.UnitTests
         }
 
         [Fact]
-        public async Task Post_RegisterSimpleExpense_CustomDistributionWithNullAmount_ReturnsBadRequest()
+        public async Task Post_RegisterSimpleExpense_CustomDistributionWithNullAmount_ProducesBadRequest()
         {
             // arrange
             var controller = new ExpensesController(_channel, _expenses, _roommates);
@@ -428,7 +428,7 @@ namespace Roomies.Tests.UnitTests
         }
 
         [Fact]
-        public async Task Post_RegisterSimpleExpense_CustomDistributionWithNegativeAmount_ReturnsBadRequest()
+        public async Task Post_RegisterSimpleExpense_CustomDistributionWithNegativeAmount_ProducesBadRequest()
         {
             // arrange
             var controller = new ExpensesController(_channel, _expenses, _roommates);
@@ -447,7 +447,7 @@ namespace Roomies.Tests.UnitTests
         }
 
         [Fact]
-        public async Task Post_RegisterSimpleExpense_ProportionalDistributionWithNullAmount_ReturnsBadRequest()
+        public async Task Post_RegisterSimpleExpense_ProportionalDistributionWithNullAmount_ProducesBadRequest()
         {
             // arrange
             var controller = new ExpensesController(_channel, _expenses, _roommates);
@@ -466,7 +466,7 @@ namespace Roomies.Tests.UnitTests
         }
 
         [Fact]
-        public async Task Post_RegisterSimpleExpense_ProportionalDistributionWithNegativeAmount_ReturnsBadRequest()
+        public async Task Post_RegisterSimpleExpense_ProportionalDistributionWithNegativeAmount_ProducesBadRequest()
         {
             // arrange
             var controller = new ExpensesController(_channel, _expenses, _roommates);
@@ -485,7 +485,7 @@ namespace Roomies.Tests.UnitTests
         }
 
         [Fact]
-        public async Task Post_RegisterSimpleExpense_ProportionalDistributionPayerWithMultiplierGreaterThanOne_ReturnsBadRequest()
+        public async Task Post_RegisterSimpleExpense_ProportionalDistributionPayerWithMultiplierGreaterThanOne_ProducesBadRequest()
         {
             // arrange
             var controller = new ExpensesController(_channel, _expenses, _roommates);
@@ -504,7 +504,7 @@ namespace Roomies.Tests.UnitTests
         }
 
         [Fact]
-        public async Task Post_RegisterSimpleExpense_ProportionalDistributionWithMultiplierSumGreaterThanOne_ReturnsBadRequest()
+        public async Task Post_RegisterSimpleExpense_ProportionalDistributionWithMultiplierSumGreaterThanOne_ProducesBadRequest()
         {
             // arrange
             var controller = new ExpensesController(_channel, _expenses, _roommates);
@@ -523,7 +523,7 @@ namespace Roomies.Tests.UnitTests
         }
 
         [Fact]
-        public async Task Post_RegisterSimpleExpense_ProportionalDistributionWithMultiplierSumLowerThanOne_ReturnsBadRequest()
+        public async Task Post_RegisterSimpleExpense_ProportionalDistributionWithMultiplierSumLowerThanOne_ProducesBadRequest()
         {
             // arrange
             var controller = new ExpensesController(_channel, _expenses, _roommates);
@@ -601,6 +601,26 @@ namespace Roomies.Tests.UnitTests
         }
 
         [Fact]
+        public void Delete_SimpleExpenseWithPayments_ProducesBadRequests()
+        {
+            // arrange
+            var controller = new ExpensesController(_channel, _expenses, _roommates);
+            var roommates = new[] { Mock.Models.Roommate(balance: -100), Mock.Models.Roommate(balance: 50), Mock.Models.Roommate(balance: 50) };
+            var expense = Mock.Models.SimpleExpense(payments: new[] { Mock.Models.PaymentSummary() });
+            _expenses.Expense = expense;
+            _roommates.Roommate = roommates[0];
+            _roommates.Roommates = roommates.Skip(1);
+
+            // act
+            var result = controller.Delete(expense.Id);
+
+            // assert
+            var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+            var errors = Assert.IsAssignableFrom<SerializableError>(badRequest.Value);
+            Assert.True(errors.ContainsKey("Payments"));
+        }
+
+        [Fact]
         public void Put_SimpleExpenseWithInvalidExpenseId_ProducesNotFoundResult()
         {
             // arrange
@@ -614,7 +634,7 @@ namespace Roomies.Tests.UnitTests
         }
 
         [Fact]
-        public void Put_SimpleExpenseWithNoPayers_ReturnsBadRequests()
+        public void Put_SimpleExpenseWithNoPayers_ProducesBadRequests()
         {
             // arrange
             var controller = new ExpensesController(_channel, _expenses, _roommates);
@@ -632,7 +652,7 @@ namespace Roomies.Tests.UnitTests
         }
 
         [Fact]
-        public void Put_SimpleExpenseWithSelfExpenses_ReturnsBadRequests()
+        public void Put_SimpleExpenseWithSelfExpenses_ProducesBadRequests()
         {
             // arrange
             var controller = new ExpensesController(_channel, _expenses, _roommates);
@@ -654,7 +674,7 @@ namespace Roomies.Tests.UnitTests
         }
 
         [Fact]
-        public void Put_SimpleExpense_PayerWithAmountAndMultiplier_ReturnsBadRequests()
+        public void Put_SimpleExpense_PayerWithAmountAndMultiplier_ProducesBadRequests()
         {
             // arrange
             var controller = new ExpensesController(_channel, _expenses, _roommates);
@@ -674,7 +694,7 @@ namespace Roomies.Tests.UnitTests
         }
 
         [Fact]
-        public void Put_SimpleExpenseWithCustomDistributionAndNullAmount_ReturnsBadRequest()
+        public void Put_SimpleExpenseWithCustomDistributionAndNullAmount_ProducesBadRequest()
         {
             // arrange
             var controller = new ExpensesController(_channel, _expenses, _roommates);
@@ -694,7 +714,7 @@ namespace Roomies.Tests.UnitTests
         }
 
         [Fact]
-        public void Put_SimpleExpenseWithCustomDistributionAndNegativeAmount_ReturnsBadRequest()
+        public void Put_SimpleExpenseWithCustomDistributionAndNegativeAmount_ProducesBadRequest()
         {
             // arrange
             var controller = new ExpensesController(_channel, _expenses, _roommates);
@@ -714,7 +734,7 @@ namespace Roomies.Tests.UnitTests
         }
 
         [Fact]
-        public void Put_SimpleExpenseWithProportionalDistributionAndNullAmount_ReturnsBadRequest()
+        public void Put_SimpleExpenseWithProportionalDistributionAndNullAmount_ProducesBadRequest()
         {
             // arrange
             var controller = new ExpensesController(_channel, _expenses, _roommates);
@@ -734,7 +754,7 @@ namespace Roomies.Tests.UnitTests
         }
 
         [Fact]
-        public void Put_SimpleExpenseWithProportionalDistributionAndNegativeAmount_ReturnsBadRequest()
+        public void Put_SimpleExpenseWithProportionalDistributionAndNegativeAmount_ProducesBadRequest()
         {
             // arrange
             var controller = new ExpensesController(_channel, _expenses, _roommates);
@@ -754,7 +774,7 @@ namespace Roomies.Tests.UnitTests
         }
 
         [Fact]
-        public void Put_SimpleExpenseWithProportionalDistributionPayerAndMultiplierGreaterThanOne_ReturnsBadRequest()
+        public void Put_SimpleExpenseWithProportionalDistributionPayerAndMultiplierGreaterThanOne_ProducesBadRequest()
         {
             // arrange
             var controller = new ExpensesController(_channel, _expenses, _roommates);
@@ -774,7 +794,7 @@ namespace Roomies.Tests.UnitTests
         }
 
         [Fact]
-        public void Put_SimpleExpenseWithProportionalDistributionAndMultiplierSumGreaterThanOne_ReturnsBadRequest()
+        public void Put_SimpleExpenseWithProportionalDistributionAndMultiplierSumGreaterThanOne_ProducesBadRequest()
         {
             // arrange
             var controller = new ExpensesController(_channel, _expenses, _roommates);
@@ -794,7 +814,7 @@ namespace Roomies.Tests.UnitTests
         }
 
         [Fact]
-        public void Put_SimpleExpenseWithProportionalDistributionAndMultiplierSumLowerThanOne_ReturnsBadRequest()
+        public void Put_SimpleExpenseWithProportionalDistributionAndMultiplierSumLowerThanOne_ProducesBadRequest()
         {
             // arrange
             var controller = new ExpensesController(_channel, _expenses, _roommates);
@@ -818,8 +838,8 @@ namespace Roomies.Tests.UnitTests
         {
             // arrange
             var controller = new ExpensesController(_channel, _expenses, _roommates);
-            var payers = new[] { Mock.Requests.Payer(multiplier: .5), Mock.Requests.Payer(multiplier: .4) };
-            var registerExpense = Mock.Requests.RegisterSimpleExpense(payers: payers, distribution: ExpenseDistribution.Proportional);
+            var payers = new[] { Mock.Requests.Payer(), Mock.Requests.Payer() };
+            var registerExpense = Mock.Requests.RegisterSimpleExpense(payers: payers);
             _roommates.Roommates = payers.Select(x => Mock.Models.Roommate(id: x.Id)).ToList();
             _roommates.Roommate = Mock.Models.Roommate(id: registerExpense.PayeeId);
             _expenses.Expense = Mock.Models.SimpleExpense(payments: new[] { Mock.Models.PaymentSummary() });
@@ -1106,7 +1126,7 @@ namespace Roomies.Tests.UnitTests
         }
 
         [Fact]
-        public async Task Post_RegisterDetailedExpenseWithIncorrectTotal_ReturnsBadRequest()
+        public async Task Post_RegisterDetailedExpenseWithIncorrectTotal_ProducesBadRequest()
         {
             // arrange
             var controller = new ExpensesController(_channel, _expenses, _roommates);
@@ -1129,7 +1149,7 @@ namespace Roomies.Tests.UnitTests
         }
 
         [Fact]
-        public async Task Post_RegisterDetailedExpenseWithIncorrectTotalPerItem_ReturnsBadRequest()
+        public async Task Post_RegisterDetailedExpenseWithIncorrectTotalPerItem_ProducesBadRequest()
         {
             // arrange
             var controller = new ExpensesController(_channel, _expenses, _roommates);
@@ -1178,7 +1198,7 @@ namespace Roomies.Tests.UnitTests
         }
 
         [Fact]
-        public async Task Post_RegisterDetailedExpenseWithNoPayers_ReturnsBadRequests()
+        public async Task Post_RegisterDetailedExpenseWithNoPayers_ProducesBadRequests()
         {
             // arrange
             var controller = new ExpensesController(_channel, _expenses, _roommates);
@@ -1196,7 +1216,7 @@ namespace Roomies.Tests.UnitTests
         }
 
         [Fact]
-        public async Task Post_RegisterDetailedExpenseWithSelfExpenses_ReturnsBadRequests()
+        public async Task Post_RegisterDetailedExpenseWithSelfExpenses_ProducesBadRequests()
         {
             // arrange
             var controller = new ExpensesController(_channel, _expenses, _roommates);
@@ -1218,7 +1238,7 @@ namespace Roomies.Tests.UnitTests
         }
 
         [Fact]
-        public async Task Post_RegisterDetailedExpense_PayerWithAmountAndMultiplier_ReturnsBadRequests()
+        public async Task Post_RegisterDetailedExpense_PayerWithAmountAndMultiplier_ProducesBadRequests()
         {
             // arrange
             var controller = new ExpensesController(_channel, _expenses, _roommates);
@@ -1344,7 +1364,7 @@ namespace Roomies.Tests.UnitTests
         }
 
         [Fact]
-        public async Task Post_RegisterDetailedExpense_CustomDistributionWithNullAmount_ReturnsBadRequest()
+        public async Task Post_RegisterDetailedExpense_CustomDistributionWithNullAmount_ProducesBadRequest()
         {
             // arrange
             var controller = new ExpensesController(_channel, _expenses, _roommates);
@@ -1364,7 +1384,7 @@ namespace Roomies.Tests.UnitTests
         }
 
         [Fact]
-        public async Task Post_RegisterDetailedExpense_CustomDistributionWithNegativeAmount_ReturnsBadRequest()
+        public async Task Post_RegisterDetailedExpense_CustomDistributionWithNegativeAmount_ProducesBadRequest()
         {
             // arrange
             var controller = new ExpensesController(_channel, _expenses, _roommates);
@@ -1384,7 +1404,7 @@ namespace Roomies.Tests.UnitTests
         }
 
         [Fact]
-        public async Task Post_RegisterDetailedExpense_ProportionalDistributionWithNullAmount_ReturnsBadRequest()
+        public async Task Post_RegisterDetailedExpense_ProportionalDistributionWithNullAmount_ProducesBadRequest()
         {
             // arrange
             var controller = new ExpensesController(_channel, _expenses, _roommates);
@@ -1404,7 +1424,7 @@ namespace Roomies.Tests.UnitTests
         }
 
         [Fact]
-        public async Task Post_RegisterDetailedExpense_ProportionalDistributionWithNegativeAmount_ReturnsBadRequest()
+        public async Task Post_RegisterDetailedExpense_ProportionalDistributionWithNegativeAmount_ProducesBadRequest()
         {
             // arrange
             var controller = new ExpensesController(_channel, _expenses, _roommates);
@@ -1424,7 +1444,7 @@ namespace Roomies.Tests.UnitTests
         }
 
         [Fact]
-        public async Task Post_RegisterDetailedExpense_ProportionalDistributionPayerWithMultiplierGreaterThanOne_ReturnsBadRequest()
+        public async Task Post_RegisterDetailedExpense_ProportionalDistributionPayerWithMultiplierGreaterThanOne_ProducesBadRequest()
         {
             // arrange
             var controller = new ExpensesController(_channel, _expenses, _roommates);
@@ -1444,7 +1464,7 @@ namespace Roomies.Tests.UnitTests
         }
 
         [Fact]
-        public async Task Post_RegisterDetailedExpense_ProportionalDistributionWithMultiplierSumGreaterThanOne_ReturnsBadRequest()
+        public async Task Post_RegisterDetailedExpense_ProportionalDistributionWithMultiplierSumGreaterThanOne_ProducesBadRequest()
         {
             // arrange
             var controller = new ExpensesController(_channel, _expenses, _roommates);
@@ -1464,7 +1484,7 @@ namespace Roomies.Tests.UnitTests
         }
 
         [Fact]
-        public async Task Post_RegisterDetailedExpense_ProportionalDistributionWithMultiplierSumLowerThanOne_ReturnsBadRequest()
+        public async Task Post_RegisterDetailedExpense_ProportionalDistributionWithMultiplierSumLowerThanOne_ProducesBadRequest()
         {
             // arrange
             var controller = new ExpensesController(_channel, _expenses, _roommates);
@@ -1539,13 +1559,9 @@ namespace Roomies.Tests.UnitTests
         public void Delete_DetailedExpenseWithPayments_ProducesBadRequests()
         {
             // arrange
-            var expected = new[] { 0M, 0M, 0M };
             var controller = new ExpensesController(_channel, _expenses, _roommates);
             var roommates = new[] { Mock.Models.Roommate(balance: -100), Mock.Models.Roommate(balance: 50), Mock.Models.Roommate(balance: 50) };
-            var payee = Mock.Models.Payee(id: roommates[0].Id);
-            var payers = roommates.Skip(1).Select(x => Mock.Models.Payer(id: x.Id, amount: 50)).ToArray();
-            var items = new[] { Mock.Models.ExpenseItem(payers: payers, price: 100) };
-            var expense = Mock.Models.DetailedExpense(total: 100, items: items, payee: payee, payments: new[] { Mock.Models.PaymentSummary() });
+            var expense = Mock.Models.DetailedExpense(payments: new[] { Mock.Models.PaymentSummary() });
             _expenses.Expense = expense;
             _roommates.Roommate = roommates[0];
             _roommates.Roommates = roommates.Skip(1);
@@ -1581,6 +1597,249 @@ namespace Roomies.Tests.UnitTests
             // assert
             Assert.Throws<ApplicationException>(action);
             Assert.Equal(expected, roommates.Select(x => x.Balance).ToArray());
+        }
+
+        [Fact]
+        public void Put_DetailedExpenseWithInvalidExpenseId_ProducesNotFoundResult()
+        {
+            // arrange
+            var controller = new ExpensesController(_channel, _expenses, _roommates);
+
+            // act
+            var result = controller.Put("", Mock.Requests.RegisterDetailedExpense());
+
+            // assert
+            Assert.IsType<NotFoundResult>(result);
+        }
+
+        [Fact]
+        public void Put_DetailedExpenseWithNoPayers_ProducesBadRequests()
+        {
+            // arrange
+            var controller = new ExpensesController(_channel, _expenses, _roommates);
+            var registerExpense = Mock.Requests.RegisterDetailedExpense(items: new[] { Mock.Requests.ExpenseItem(payers: new RegisterExpensePayer[0]) });
+            _roommates.Roommate = Mock.Models.Roommate(id: registerExpense.PayeeId);
+            _expenses.Expense = Mock.Models.DetailedExpense();
+
+            // act
+            var result = controller.Put(_expenses.Expense.Id, registerExpense);
+
+            // assert
+            var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+            var errors = Assert.IsAssignableFrom<SerializableError>(badRequest.Value);
+            Assert.True(errors.ContainsKey("Payers"));
+        }
+
+        [Fact]
+        public void Put_DetailedExpenseWithSelfExpenses_ProducesBadRequests()
+        {
+            // arrange
+            var controller = new ExpensesController(_channel, _expenses, _roommates);
+            var payee = Mock.Models.Roommate();
+            var payers = new[] { Mock.Requests.Payer(id: payee.Id) };
+            var items = new[] { Mock.Requests.ExpenseItem(payers: payers) };
+            var registerExpense = Mock.Requests.RegisterDetailedExpense(payeeId: payee.Id, items: items);
+            _roommates.Roommates = new[] { payee };
+            _roommates.Roommate = payee;
+            _expenses.Expense = Mock.Models.DetailedExpense();
+
+            // act
+            var result = controller.Put(_expenses.Expense.Id, registerExpense);
+
+            // assert
+            var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+            var errors = Assert.IsAssignableFrom<SerializableError>(badRequest.Value);
+            Assert.True(errors.ContainsKey("PayeeId"));
+            Assert.True(errors.ContainsKey("Payers"));
+        }
+
+        [Fact]
+        public void Put_DetailedExpense_PayerWithAmountAndMultiplier_ProducesBadRequests()
+        {
+            // arrange
+            var controller = new ExpensesController(_channel, _expenses, _roommates);
+            var payers = new[] { Mock.Requests.Payer(amount: 1, multiplier: 1) };
+            var items = new[] { Mock.Requests.ExpenseItem(payers: payers) };
+            var registerExpense = Mock.Requests.RegisterDetailedExpense(items: items);
+            _roommates.Roommates = payers.Select(x => Mock.Models.Roommate(id: x.Id)).ToList();
+            _roommates.Roommate = Mock.Models.Roommate(id: registerExpense.PayeeId);
+            _expenses.Expense = Mock.Models.DetailedExpense();
+
+            // act
+            var result = controller.Put(_expenses.Expense.Id, registerExpense);
+
+            // assert
+            var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+            var errors = Assert.IsAssignableFrom<SerializableError>(badRequest.Value);
+            Assert.True(errors.ContainsKey("Payers"));
+        }
+
+        [Fact]
+        public void Put_DetailedExpenseWithCustomDistributionAndNullAmount_ProducesBadRequest()
+        {
+            // arrange
+            var controller = new ExpensesController(_channel, _expenses, _roommates);
+            var payers = new[] { Mock.Requests.Payer(amount: null), Mock.Requests.Payer(amount: null) };
+            var items = new[] { Mock.Requests.ExpenseItem(payers: payers, distribution: ExpenseDistribution.Custom) };
+            var registerExpense = Mock.Requests.RegisterDetailedExpense(items: items);
+            _roommates.Roommates = payers.Select(x => Mock.Models.Roommate(id: x.Id)).ToList();
+            _roommates.Roommate = Mock.Models.Roommate(id: registerExpense.PayeeId);
+            _expenses.Expense = Mock.Models.DetailedExpense();
+
+            // act
+            var result = controller.Put(_expenses.Expense.Id, registerExpense);
+
+            // assert
+            var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+            var errors = Assert.IsAssignableFrom<SerializableError>(badRequest.Value);
+            Assert.True(errors.ContainsKey("Payers"));
+        }
+
+        [Fact]
+        public void Put_DetailedExpenseWithCustomDistributionAndNegativeAmount_ProducesBadRequest()
+        {
+            // arrange
+            var controller = new ExpensesController(_channel, _expenses, _roommates);
+            var payers = new[] { Mock.Requests.Payer(amount: -2), Mock.Requests.Payer(amount: -9) };
+            var items = new[] { Mock.Requests.ExpenseItem(payers: payers, distribution: ExpenseDistribution.Custom) };
+            var registerExpense = Mock.Requests.RegisterDetailedExpense(items: items);
+            _roommates.Roommates = payers.Select(x => Mock.Models.Roommate(id: x.Id)).ToList();
+            _roommates.Roommate = Mock.Models.Roommate(id: registerExpense.PayeeId);
+            _expenses.Expense = Mock.Models.DetailedExpense();
+
+            // act
+            var result = controller.Put(_expenses.Expense.Id, registerExpense);
+
+            // assert
+            var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+            var errors = Assert.IsAssignableFrom<SerializableError>(badRequest.Value);
+            Assert.True(errors.ContainsKey("Payers"));
+        }
+
+        [Fact]
+        public void Put_DetailedWithProportionalDistributionAndNullAmount_ProducesBadRequest()
+        {
+            // arrange
+            var controller = new ExpensesController(_channel, _expenses, _roommates);
+            var payers = new[] { Mock.Requests.Payer(multiplier: null), Mock.Requests.Payer(multiplier: null) };
+            var items = new[] { Mock.Requests.ExpenseItem(payers: payers, distribution: ExpenseDistribution.Proportional) };
+            var registerExpense = Mock.Requests.RegisterDetailedExpense(items: items);
+            _roommates.Roommates = payers.Select(x => Mock.Models.Roommate(id: x.Id)).ToList();
+            _roommates.Roommate = Mock.Models.Roommate(id: registerExpense.PayeeId);
+            _expenses.Expense = Mock.Models.DetailedExpense();
+
+            // act
+            var result = controller.Put(_expenses.Expense.Id, registerExpense);
+
+            // assert
+            var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+            var errors = Assert.IsAssignableFrom<SerializableError>(badRequest.Value);
+            Assert.True(errors.ContainsKey("Payers"));
+        }
+
+        [Fact]
+        public void Put_DetailedExpenseWithProportionalDistributionAndNegativeAmount_ProducesBadRequest()
+        {
+            // arrange
+            var controller = new ExpensesController(_channel, _expenses, _roommates);
+            var payers = new[] { Mock.Requests.Payer(multiplier: -.2), Mock.Requests.Payer(multiplier: 1.2) };
+            var items = new[] { Mock.Requests.ExpenseItem(payers: payers, distribution: ExpenseDistribution.Proportional) };
+            var registerExpense = Mock.Requests.RegisterDetailedExpense(items: items);
+            _roommates.Roommates = payers.Select(x => Mock.Models.Roommate(id: x.Id)).ToList();
+            _roommates.Roommate = Mock.Models.Roommate(id: registerExpense.PayeeId);
+            _expenses.Expense = Mock.Models.DetailedExpense();
+
+            // act
+            var result = controller.Put(_expenses.Expense.Id, registerExpense);
+
+            // assert
+            var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+            var errors = Assert.IsAssignableFrom<SerializableError>(badRequest.Value);
+            Assert.True(errors.ContainsKey("Payers"));
+        }
+
+        [Fact]
+        public void Put_DetailedExpenseWithProportionalDistributionPayerAndMultiplierGreaterThanOne_ProducesBadRequest()
+        {
+            // arrange
+            var controller = new ExpensesController(_channel, _expenses, _roommates);
+            var payers = new[] { Mock.Requests.Payer(multiplier: 1.2), Mock.Requests.Payer(multiplier: .2) };
+            var items = new[] { Mock.Requests.ExpenseItem(payers: payers, distribution: ExpenseDistribution.Proportional) };
+            var registerExpense = Mock.Requests.RegisterDetailedExpense(items: items);
+            _roommates.Roommates = payers.Select(x => Mock.Models.Roommate(id: x.Id)).ToList();
+            _roommates.Roommate = Mock.Models.Roommate(id: registerExpense.PayeeId);
+            _expenses.Expense = Mock.Models.DetailedExpense();
+
+            // act
+            var result = controller.Put(_expenses.Expense.Id, registerExpense);
+
+            // assert
+            var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+            var errors = Assert.IsAssignableFrom<SerializableError>(badRequest.Value);
+            Assert.True(errors.ContainsKey("Payers"));
+        }
+
+        [Fact]
+        public void Put_DetailedExpenseWithProportionalDistributionAndMultiplierSumGreaterThanOne_ProducesBadRequest()
+        {
+            // arrange
+            var controller = new ExpensesController(_channel, _expenses, _roommates);
+            var payers = new[] { Mock.Requests.Payer(multiplier: .5), Mock.Requests.Payer(multiplier: .9) };
+            var items = new[] { Mock.Requests.ExpenseItem(payers: payers, distribution: ExpenseDistribution.Proportional) };
+            var registerExpense = Mock.Requests.RegisterDetailedExpense(items: items);
+            _roommates.Roommates = payers.Select(x => Mock.Models.Roommate(id: x.Id)).ToList();
+            _roommates.Roommate = Mock.Models.Roommate(id: registerExpense.PayeeId);
+            _expenses.Expense = Mock.Models.DetailedExpense();
+
+            // act
+            var result = controller.Put(_expenses.Expense.Id, registerExpense);
+
+            // assert
+            var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+            var errors = Assert.IsAssignableFrom<SerializableError>(badRequest.Value);
+            Assert.True(errors.ContainsKey("Payers"));
+        }
+
+        [Fact]
+        public void Put_DetailedExpenseWithProportionalDistributionAndMultiplierSumLowerThanOne_ProducesBadRequest()
+        {
+            // arrange
+            var controller = new ExpensesController(_channel, _expenses, _roommates);
+            var payers = new[] { Mock.Requests.Payer(multiplier: .5), Mock.Requests.Payer(multiplier: .4) };
+            var items = new[] { Mock.Requests.ExpenseItem(payers: payers, distribution: ExpenseDistribution.Proportional) };
+            var registerExpense = Mock.Requests.RegisterDetailedExpense(items: items);
+            _roommates.Roommates = payers.Select(x => Mock.Models.Roommate(id: x.Id)).ToList();
+            _roommates.Roommate = Mock.Models.Roommate(id: registerExpense.PayeeId);
+            _expenses.Expense = Mock.Models.DetailedExpense();
+
+            // act
+            var result = controller.Put(_expenses.Expense.Id, registerExpense);
+
+            // assert
+            var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+            var errors = Assert.IsAssignableFrom<SerializableError>(badRequest.Value);
+            Assert.True(errors.ContainsKey("Payers"));
+        }
+
+        [Fact]
+        public void Put_DetailedExpenseWithPayments_ProducesBadRequest()
+        {
+            // arrange
+            var controller = new ExpensesController(_channel, _expenses, _roommates);
+            var payers = new[] { Mock.Requests.Payer(), Mock.Requests.Payer() };
+            var items = new[] { Mock.Requests.ExpenseItem(payers: payers) };
+            var registerExpense = Mock.Requests.RegisterDetailedExpense(items: items);
+            _roommates.Roommates = payers.Select(x => Mock.Models.Roommate(id: x.Id)).ToList();
+            _roommates.Roommate = Mock.Models.Roommate(id: registerExpense.PayeeId);
+            _expenses.Expense = Mock.Models.DetailedExpense(payments: new[] { Mock.Models.PaymentSummary() });
+
+            // act
+            var result = controller.Put(_expenses.Expense.Id, registerExpense);
+
+            // assert
+            var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+            var errors = Assert.IsAssignableFrom<SerializableError>(badRequest.Value);
+            Assert.True(errors.ContainsKey("Payments"));
         }
         #endregion
 
