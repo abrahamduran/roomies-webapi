@@ -269,7 +269,7 @@ namespace Roomies.WebAPI.Controllers
             var entity = ValidateSimpleExpense(simpleExpense);
             if (!ModelState.IsValid) return null;
 
-            if (simpleExpense.Description.Length < 31)
+            if (simpleExpense.Description?.Length < 31)
                 autocomplete.Add(new Autocomplete { Text = simpleExpense.Description, Type = AutocompleteType.ItemName });
 
             var result = _expenses.Add(entity);
