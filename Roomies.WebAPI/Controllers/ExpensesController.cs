@@ -258,6 +258,14 @@ namespace Roomies.WebAPI.Controllers
         {
             autocomplete = new List<Autocomplete>();
             autocomplete.Add(new Autocomplete { Text = expense.BusinessName, Type = AutocompleteType.BusinessName });
+
+            expense.Tags = expense.Tags?.Select(x => x.ToLower()).ToArray();
+            if (expense.Tags?.Any(x => x.Contains(' ') || x.Contains('_')) == true)
+            {
+                ModelState.AddModelError("Tags", "Tags cannot contain whitespaces. Use dashes (-) instead.");
+                return null;
+            }
+
             if (expense.Items?.Any() == true)
                 return RegisterDetailedExpense(expense, autocomplete);
             else
@@ -296,8 +304,8 @@ namespace Roomies.WebAPI.Controllers
 
         private Expense ValidateExpense(RegisterExpense expense)
         {
-            expense.Tags = expense.Tags.Select(x => x.ToLower()).ToArray();
-            if (expense.Tags.Any(x => x.Contains(' ') || x.Contains('_')))
+            expense.Tags = expense.Tags?.Select(x => x.ToLower()).ToArray();
+            if (expense.Tags?.Any(x => x.Contains(' ') || x.Contains('_')) == true)
             {
                 ModelState.AddModelError("Tags", "Tags cannot contain whitespaces. Use dashes (-) instead.");
                 return null;
