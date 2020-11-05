@@ -19,6 +19,7 @@ namespace Roomies.WebAPI.Requests
         public string PayeeId { get; set; }
         [MaxLength(100)]
         public string Description { get; set; }
+        public IEnumerable<string> Tags { get; set; }
 
         #region Simple Expense
         [MinLength(1, ErrorMessage = "At least one payer must be selected.")]
@@ -30,6 +31,7 @@ namespace Roomies.WebAPI.Requests
             return new SimpleExpense
             {
                 Date = registerExpense.Date,
+                Tags = registerExpense.Tags,
                 Total = registerExpense.Total,
                 Description = registerExpense.Description,
                 BusinessName = registerExpense.BusinessName,
@@ -47,6 +49,7 @@ namespace Roomies.WebAPI.Requests
             return new DetailedExpense
             {
                 Date = registerExpense.Date,
+                Tags = registerExpense.Tags,
                 Total = registerExpense.Total,
                 Description = registerExpense.Description,
                 BusinessName = registerExpense.BusinessName
@@ -66,10 +69,6 @@ namespace Roomies.WebAPI.Requests
 
         public static RegisterExpense From(SimpleExpense simple)
         {
-            //! simple.Id;
-            //~ simple.Payee;
-            //~ simple.Payers;
-            //! simple.Payments;
             return new RegisterExpense
             {
                 BusinessName = simple.BusinessName,
@@ -78,16 +77,13 @@ namespace Roomies.WebAPI.Requests
                 Distribution = simple.Distribution,
                 PayeeId = simple.Payee.Id,
                 Payers = simple.Payers.Select(x => RegisterExpensePayer.From(x, simple.Distribution, simple.Total)).ToList(),
-                Total = simple.Total
+                Total = simple.Total,
+                Tags = simple.Tags
             };
         }
 
         public static RegisterExpense From(DetailedExpense detailed)
         {
-            //! detailed.Id
-            //~ detailed.Items
-            //~ detailed.Payee
-            //! detailed.Payments
             return new RegisterExpense
             {
                 BusinessName = detailed.BusinessName,
@@ -95,7 +91,8 @@ namespace Roomies.WebAPI.Requests
                 Description = detailed.Description,
                 PayeeId = detailed.Payee.Id,
                 Items = detailed.Items.Select(i => RegisterExpenseItem.From(i)).ToList(),
-                Total = detailed.Total
+                Total = detailed.Total,
+                Tags = detailed.Tags
             };
         }
     }

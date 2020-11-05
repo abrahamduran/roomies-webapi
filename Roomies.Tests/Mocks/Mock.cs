@@ -130,7 +130,8 @@ namespace Roomies.Tests.Mocks
             internal static RegisterExpense RegisterSimpleExpense(
                 string payeeId = null, string businessName = "Umbrella Corp", decimal total = 1,
                 DateTime? date = null, string description = "Lorem ipsum dolor sit amet",
-                RegisterExpensePayer[] payers = null, ExpenseDistribution? distribution = ExpenseDistribution.Even)
+                RegisterExpensePayer[] payers = null, ExpenseDistribution? distribution = ExpenseDistribution.Even,
+                string[] tags = null)
                 => new RegisterExpense
                 {
                     BusinessName = businessName,
@@ -139,13 +140,14 @@ namespace Roomies.Tests.Mocks
                     Distribution = distribution,
                     PayeeId = payeeId ?? Guid.NewGuid().ToString(),
                     Payers = payers ?? new[] { Payer(), Payer() },
-                    Total = total
+                    Total = total,
+                    Tags = tags
                 };
 
             internal static RegisterExpense RegisterDetailedExpense(
                 string payeeId = null, string businessName = "Umbrella Corp", decimal total = 1,
                 DateTime? date = null, string description = "Lorem ipsum dolor sit amet",
-                RegisterExpenseItem[] items = null)
+                RegisterExpenseItem[] items = null, string[] tags = null)
                 => new RegisterExpense
                 {
                     BusinessName = businessName,
@@ -153,7 +155,8 @@ namespace Roomies.Tests.Mocks
                     Description = description,
                     PayeeId = payeeId ?? Guid.NewGuid().ToString(),
                     Items = items ?? new[] { ExpenseItem() },
-                    Total = total
+                    Total = total,
+                    Tags = tags
                 };
 
             internal static RegisterExpensePayer Payer(string id = null, decimal? amount = null, double? multiplier = null)

@@ -13,6 +13,7 @@ namespace Roomies.WebAPI.Models
     {
         public string BusinessName { get; set; }
         public Payee Payee { get; set; }
+        public IEnumerable<string> Tags { get; set; }
 
         public IEnumerable<PaymentSummary> Payments { get; set; }
         public ExpenseStatus Status

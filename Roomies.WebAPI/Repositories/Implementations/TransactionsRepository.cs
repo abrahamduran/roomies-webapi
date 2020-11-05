@@ -23,6 +23,8 @@ namespace Roomies.WebAPI.Repositories.Implementations
             _transactions.OfType<Payment>().CreateIndex(x => x.By.Id);
             _transactions.OfType<Payment>().CreateIndex(x => x.To.Id);
             _transactions.OfType<Payment>().CreateIndex("expenses._id");
+            _transactions.OfType<Expense>().CreateIndex(x => x.Tags);
+            _transactions.OfType<Expense>().CreateIndex(x => x.Payee.Id);
             _transactions.OfType<Expense>().CreateIndex("payers._id");
             _transactions.OfType<DetailedExpense>().CreateIndex("items._id");
             _transactions.OfType<DetailedExpense>().CreateIndex("items.payers._id");

@@ -125,6 +125,25 @@ namespace Roomies.Tests.UnitTests
         }
 
         [Fact]
+        public async Task Post_RegisterSimpleExpenseWithWhitespacedTags_ProducesBadRequestResult()
+        {
+            // arrange
+            var controller = new ExpensesController(_channel, _expenses, _roommates);
+            var tags = new[] { "a tag with whitespaces" };
+            var registerExpense = Mock.Requests.RegisterSimpleExpense(tags: tags);
+            _roommates.Roommates = registerExpense.Payers.Select(x => Mock.Models.Roommate(id: x.Id)).ToList();
+            _roommates.Roommate = Mock.Models.Roommate(id: registerExpense.PayeeId);
+
+            // act
+            var result = (await controller.Post(registerExpense)).Result;
+
+            // assert
+            var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+            var errors = Assert.IsAssignableFrom<SerializableError>(badRequest.Value);
+            Assert.True(errors.ContainsKey("Tags"));
+        }
+
+        [Fact]
         public async Task Post_RegisterSimpleExpenseWithNullDistributionAndSinglePayer_RegistersExpenseSuccessfuly()
         {
             // arrange
