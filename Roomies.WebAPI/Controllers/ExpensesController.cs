@@ -310,11 +310,13 @@ namespace Roomies.WebAPI.Controllers
                 return null;
             }
 
-            if (simpleExpense.Distribution == null)
+            if (simpleExpense.Distribution == null && simpleExpense.Payers?.Count() != 1)
             {
                 ModelState.AddModelError("Distribution", "When registering a Simple Expense, you must specify the type of distribution.");
                 return null;
             }
+            else if (simpleExpense.Distribution == null && simpleExpense.Payers?.Count() == 1)
+                simpleExpense.Distribution = ExpenseDistribution.Even;
 
             #region Validate Payers & Payee
             var roommate = _roommates.Get(simpleExpense.PayeeId);
