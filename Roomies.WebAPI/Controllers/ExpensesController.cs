@@ -348,7 +348,7 @@ namespace Roomies.WebAPI.Controllers
 
             #region Validate Totals
             var payersTotal = entity.Payers.Sum(x => x.Amount);
-            if (payersTotal != entity.Total)
+            if (payersTotal < entity.Total || payersTotal > (entity.Total + 0.1M))
             {
                 ModelState.AddModelError("Total", "The total amount for this expense and the total amount by payers' distribution differ.");
                 ModelState.AddModelError("Total", $"Invoice total: {entity.Total}");
@@ -422,7 +422,7 @@ namespace Roomies.WebAPI.Controllers
                 return null;
             }
             var payersTotal = entity.Items.Sum(i => i.Payers.Sum(p => p.Amount));
-            if (payersTotal != entity.Total)
+            if (payersTotal < entity.Total || payersTotal > (entity.Total + 0.1M))
             {
                 ModelState.AddModelError("Total", "The total amount for this expense and the total amount by payers' distribution differ.");
                 ModelState.AddModelError("Total", $"Invoice total: {entity.Total}");
