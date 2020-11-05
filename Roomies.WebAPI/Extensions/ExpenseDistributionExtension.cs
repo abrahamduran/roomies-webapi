@@ -7,8 +7,6 @@ namespace Roomies.WebAPI.Extensions
 {
     internal static class ExpenseDistributionExtension
     {
-        private static Func<decimal, decimal> rounded = (amount) => decimal.Round(amount, 2, MidpointRounding.ToPositiveInfinity);
-
         internal static decimal GetAmount(this ExpenseDistribution distribution, RegisterExpense expense, RegisterExpensePayer payer)
             => GetAmount(distribution, expense.Total, payer.Amount, payer.Multiplier, expense.Payers.Count());
 
@@ -20,11 +18,11 @@ namespace Roomies.WebAPI.Extensions
             switch (distribution)
             {
                 case ExpenseDistribution.Proportional:
-                    return rounded(total * (decimal)multiplier);
+                    return total * (decimal)multiplier;
                 case ExpenseDistribution.Even:
-                    return rounded(total / payersCount);
+                    return total / payersCount;
                 case ExpenseDistribution.Custom:
-                    return rounded(payerAmount.Value);
+                    return payerAmount.Value;
             }
             throw new NotImplementedException($"ExpenseDistribution case {distribution} was not properly handled in GetAmount.");
         }

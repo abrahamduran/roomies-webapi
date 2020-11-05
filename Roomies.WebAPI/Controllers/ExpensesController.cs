@@ -348,7 +348,7 @@ namespace Roomies.WebAPI.Controllers
             entity.Payers = simpleExpense.Payers.Select(x => new Payer
             {
                 Id = x.Id,
-                Amount = simpleExpense.Distribution.Value.GetAmount(simpleExpense, x),
+                Amount = simpleExpense.Distribution.Value.GetAmount(simpleExpense, x).Rounded(3),
                 Name = roommates.Single(p => p.Id == x.Id).Name
             }).ToList();
             #endregion
@@ -412,7 +412,7 @@ namespace Roomies.WebAPI.Controllers
                 {
                     Id = p.Id,
                     Name = roommates.Single(x => x.Id == p.Id).Name,
-                    Amount = i.Distribution.GetAmount(i, p)
+                    Amount = i.Distribution.GetAmount(i, p).Rounded(3)
                 }).ToList();
                 return item;
             }).ToList();
