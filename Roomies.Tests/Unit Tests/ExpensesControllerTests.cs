@@ -8,6 +8,7 @@ using Roomies.Tests.Mocks;
 using Roomies.WebAPI.Controllers;
 using Roomies.WebAPI.Models;
 using Roomies.WebAPI.Requests;
+using Roomies.WebAPI.Responses;
 using Xunit;
 
 namespace Roomies.Tests.UnitTests
@@ -30,15 +31,16 @@ namespace Roomies.Tests.UnitTests
         {
             // arrange
             var controller = new ExpensesController(_channel, _expenses, _roommates);
-            var expected = new List<Expense>() { Mock.Models.SimpleExpense(), Mock.Models.DetailedExpense() };
-            _expenses.Expenses = expected;
+            var expenses = new List<Expense>() { Mock.Models.SimpleExpense(), Mock.Models.DetailedExpense() };
+            var expected = expenses.Select(x => ExpenseResult.ForExpense(x)).ToList();
+            _expenses.Expenses = expenses;
 
             // act
             var result = controller.Get().Result;
             
             // assert
             var ok = Assert.IsType<OkObjectResult>(result);
-            var list = Assert.IsType<List<Expense>>(ok.Value);
+            var list = Assert.IsType<List<ExpenseResult>>(ok.Value);
             Assert.Equal(expected, list);
         }
 
@@ -47,15 +49,15 @@ namespace Roomies.Tests.UnitTests
         {
             // arrange
             var controller = new ExpensesController(_channel, _expenses, _roommates);
-            var expected = new List<Expense>();
-            _expenses.Expenses = expected;
+            var expected = new List<ExpenseResult>();
+            _expenses.Expenses = new List<Expense>();
 
             // act
             var result = controller.Get().Result;
 
             // assert
             var ok = Assert.IsType<OkObjectResult>(result);
-            var list = Assert.IsType<List<Expense>>(ok.Value);
+            var list = Assert.IsType<List<ExpenseResult>>(ok.Value);
             Assert.Equal(expected, list);
         }
 
@@ -73,7 +75,7 @@ namespace Roomies.Tests.UnitTests
 
             // assert
             var ok = Assert.IsType<OkObjectResult>(result);
-            var value = Assert.IsAssignableFrom<Expense>(ok.Value);
+            var value = Assert.IsAssignableFrom<ExpenseResult>(ok.Value);
             Assert.Equal(expected, value.Id);
         }
 
@@ -158,7 +160,7 @@ namespace Roomies.Tests.UnitTests
 
             // assert
             var created = Assert.IsType<CreatedAtActionResult>(result);
-            Assert.IsAssignableFrom<SimpleExpense>(created.Value);
+            Assert.IsAssignableFrom<ExpenseResult>(created.Value);
         }
 
         [Theory, MemberData(nameof(EvenDistributions))]
@@ -176,7 +178,7 @@ namespace Roomies.Tests.UnitTests
 
             // assert
             var created = Assert.IsType<CreatedAtActionResult>(result);
-            var expense = Assert.IsAssignableFrom<SimpleExpense>(created.Value);
+            var expense = Assert.IsAssignableFrom<ExpenseResult>(created.Value);
             Assert.Equal(expected, expense.Payers.Select(x => x.Amount));
         }
 
@@ -195,7 +197,7 @@ namespace Roomies.Tests.UnitTests
 
             // assert
             var created = Assert.IsType<CreatedAtActionResult>(result);
-            var expense = Assert.IsAssignableFrom<SimpleExpense>(created.Value);
+            var expense = Assert.IsAssignableFrom<ExpenseResult>(created.Value);
             Assert.Equal(expected, expense.Payers.Select(x => x.Amount));
         }
 
@@ -214,7 +216,7 @@ namespace Roomies.Tests.UnitTests
 
             // assert
             var created = Assert.IsType<CreatedAtActionResult>(result);
-            var expense = Assert.IsAssignableFrom<SimpleExpense>(created.Value);
+            var expense = Assert.IsAssignableFrom<ExpenseResult>(created.Value);
             Assert.Equal(expected, expense.Payers.Select(x => x.Amount));
         }
 
@@ -362,7 +364,7 @@ namespace Roomies.Tests.UnitTests
 
             // assert
             var created = Assert.IsType<CreatedAtActionResult>(result);
-            var expense = Assert.IsAssignableFrom<SimpleExpense>(created.Value);
+            var expense = Assert.IsAssignableFrom<ExpenseResult>(created.Value);
             Assert.Equal(expected, expense.Payers.Select(x => x.Id).ToList());
         }
 
@@ -382,7 +384,7 @@ namespace Roomies.Tests.UnitTests
 
             // assert
             var created = Assert.IsType<CreatedAtActionResult>(result);
-            var expense = Assert.IsAssignableFrom<SimpleExpense>(created.Value);
+            var expense = Assert.IsAssignableFrom<ExpenseResult>(created.Value);
             Assert.Equal(expected, expense.Total);
         }
 
@@ -1620,7 +1622,7 @@ namespace Roomies.Tests.UnitTests
 
             // assert
             var created = Assert.IsType<CreatedAtActionResult>(result);
-            var expense = Assert.IsAssignableFrom<DetailedExpense>(created.Value);
+            var expense = Assert.IsAssignableFrom<ExpenseResult>(created.Value);
             var actual = expense.Items.Select(i => i.Payers.Select(p => p.Amount));
             Assert.Equal(new[] { expected }, actual);
         }
@@ -1641,7 +1643,7 @@ namespace Roomies.Tests.UnitTests
 
             // assert
             var created = Assert.IsType<CreatedAtActionResult>(result);
-            var expense = Assert.IsAssignableFrom<DetailedExpense>(created.Value);
+            var expense = Assert.IsAssignableFrom<ExpenseResult>(created.Value);
             var actual = expense.Items.Select(i => i.Payers.Select(p => p.Amount));
             Assert.Equal(new[] { expected }, actual);
         }
@@ -1662,7 +1664,7 @@ namespace Roomies.Tests.UnitTests
 
             // assert
             var created = Assert.IsType<CreatedAtActionResult>(result);
-            var expense = Assert.IsAssignableFrom<DetailedExpense>(created.Value);
+            var expense = Assert.IsAssignableFrom<ExpenseResult>(created.Value);
             var actual = expense.Items.Select(i => i.Payers.Select(p => p.Amount));
             Assert.Equal(new[] { expected }, actual);
         }
@@ -1816,7 +1818,7 @@ namespace Roomies.Tests.UnitTests
 
             // assert
             var created = Assert.IsType<CreatedAtActionResult>(result);
-            var expense = Assert.IsAssignableFrom<DetailedExpense>(created.Value);
+            var expense = Assert.IsAssignableFrom<ExpenseResult>(created.Value);
             var actual = expense.Items.Select(i => i.Payers.Select(p => p.Id)).ToList();
             Assert.Equal(new[] { expected }, actual);
         }
@@ -1838,7 +1840,7 @@ namespace Roomies.Tests.UnitTests
 
             // assert
             var created = Assert.IsType<CreatedAtActionResult>(result);
-            var expense = Assert.IsAssignableFrom<DetailedExpense>(created.Value);
+            var expense = Assert.IsAssignableFrom<ExpenseResult>(created.Value);
             Assert.Equal(expected, expense.Total);
         }
 
@@ -2069,7 +2071,7 @@ namespace Roomies.Tests.UnitTests
 
             // assert
             var created = Assert.IsType<CreatedAtActionResult>(result);
-            Assert.IsAssignableFrom<DetailedExpense>(created.Value);
+            Assert.IsAssignableFrom<ExpenseResult>(created.Value);
             Assert.Equal(-0.5M, payee.Balance);
         }
 

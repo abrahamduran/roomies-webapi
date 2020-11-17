@@ -12,6 +12,7 @@ using Roomies.WebAPI.Extensions;
 using Roomies.WebAPI.Models;
 using Roomies.WebAPI.Repositories.Interfaces;
 using Roomies.WebAPI.Requests;
+using Roomies.WebAPI.Responses;
 
 namespace Roomies.WebAPI.Controllers
 {
@@ -24,6 +25,7 @@ namespace Roomies.WebAPI.Controllers
         private readonly IExpensesRepository _expenses;
         private readonly IRoommatesRepository _roommates;
         private readonly ChannelWriter<IEnumerable<Autocomplete>> _channel;
+        private Func<Expense, ExpenseResult> toResponse = (expense) => ExpenseResult.ForExpense(expense);
 
         public ExpensesController(Channel<IEnumerable<Autocomplete>> channel, IExpensesRepository expenses, IRoommatesRepository roommates)
         {
@@ -35,16 +37,16 @@ namespace Roomies.WebAPI.Controllers
         // GET: api/expenses
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult<IEnumerable<Expense>> Get() => Ok(_expenses.Get());
+        public ActionResult<IEnumerable<ExpenseResult>> Get() => Ok(_expenses.Get().Select(toResponse).ToList());
 
         // GET api/expenses/{id}
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<Expense> Get(string id)
+        public ActionResult<ExpenseResult> Get(string id)
         {
             var result = _expenses.Get(id);
-            if (result != null) return Ok(result);
+            if (result != null) return Ok(toResponse(result));
 
             return NotFound();
         }
@@ -53,7 +55,7 @@ namespace Roomies.WebAPI.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(Dictionary<string, string[]>), StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<Expense>> Post([FromBody] RegisterExpense expense)
+        public async Task<ActionResult<ExpenseResult>> Post([FromBody] RegisterExpense expense)
         {
             if (ModelState.IsValid)
             {
@@ -62,7 +64,7 @@ namespace Roomies.WebAPI.Controllers
                 if (result != null)
                 {
                     await _channel.WriteAsync(autocomplete);
-                    return CreatedAtAction(nameof(Post), new { id = result.Id }, result);
+                    return CreatedAtAction(nameof(Post), new { id = result.Id }, toResponse(result));
                 }
             }
             
@@ -72,6 +74,9 @@ namespace Roomies.WebAPI.Controllers
         // TODO: part of the patch update and the put update can be reused
         // PATCH api/expenses/{id}
         [HttpPatch("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(typeof(Dictionary<string, string[]>), StatusCodes.Status400BadRequest)]
         public ActionResult Patch(string id, [FromBody] JsonPatchDocument<RegisterExpense> patch)
         {
