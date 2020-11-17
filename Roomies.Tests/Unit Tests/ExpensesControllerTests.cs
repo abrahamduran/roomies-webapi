@@ -32,7 +32,7 @@ namespace Roomies.Tests.UnitTests
             // arrange
             var controller = new ExpensesController(_channel, _expenses, _roommates);
             var expenses = new List<Expense>() { Mock.Models.SimpleExpense(), Mock.Models.DetailedExpense() };
-            var expected = expenses.Select(x => ExpenseResult.ForExpense(x)).ToList();
+            var expected = expenses.Select(x => ExpenseResult.ForExpense(x, false)).ToList();
             _expenses.Expenses = expenses;
 
             // act
@@ -75,8 +75,27 @@ namespace Roomies.Tests.UnitTests
 
             // assert
             var ok = Assert.IsType<OkObjectResult>(result);
-            var value = Assert.IsAssignableFrom<ExpenseResult>(ok.Value);
-            Assert.Equal(expected, value.Id);
+            var actual = Assert.IsAssignableFrom<ExpenseResult>(ok.Value);
+            Assert.Equal(expected, actual.Id);
+        }
+
+        [Fact]
+        public void Get_RequestExpenseWithPayments_ReturnsSingleExpenseWith200Status()
+        {
+            // arrange
+            var controller = new ExpensesController(_channel, _expenses, _roommates);
+            var expense = Mock.Models.SimpleExpense(payments: new[] { Mock.Models.PaymentSummary() });
+            var expected = expense.Id;
+            _expenses.Expense = expense;
+
+            // act
+            var result = controller.Get(expense.Id).Result;
+
+            // assert
+            var ok = Assert.IsType<OkObjectResult>(result);
+            var actual = Assert.IsAssignableFrom<ExpenseResult>(ok.Value);
+            Assert.Equal(expected, actual.Id);
+            Assert.NotNull(actual.Payments);
         }
 
         [Fact]
@@ -160,7 +179,8 @@ namespace Roomies.Tests.UnitTests
 
             // assert
             var created = Assert.IsType<CreatedAtActionResult>(result);
-            Assert.IsAssignableFrom<ExpenseResult>(created.Value);
+            var actual = Assert.IsAssignableFrom<ExpenseResult>(created.Value);
+            Assert.Null(actual.Payments);
         }
 
         [Theory, MemberData(nameof(EvenDistributions))]

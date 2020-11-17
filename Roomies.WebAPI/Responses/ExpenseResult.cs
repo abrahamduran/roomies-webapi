@@ -36,14 +36,14 @@ namespace Roomies.WebAPI.Responses
                 Status = expense.Status
             };
 
-        public static ExpenseResult ForExpense(Expense expense)
+        public static ExpenseResult ForExpense(Expense expense, bool includePayments)
         {
-            if (expense is SimpleExpense simple) return ForSimpleExpense(simple);
-            if (expense is DetailedExpense detailed) return ForDetailedExpense(detailed);
+            if (expense is SimpleExpense simple) return ForSimpleExpense(simple, includePayments);
+            if (expense is DetailedExpense detailed) return ForDetailedExpense(detailed, includePayments);
             return null;
         }
 
-        public static ExpenseResult ForSimpleExpense(SimpleExpense expense) =>
+        public static ExpenseResult ForSimpleExpense(SimpleExpense expense, bool includePayments) =>
             new ExpenseResult
             {
                 BusinessName = expense.BusinessName,
@@ -53,11 +53,12 @@ namespace Roomies.WebAPI.Responses
                 Id = expense.Id,
                 Payee = expense.Payee,
                 Payers = expense.Payers,
+                Payments = includePayments ? expense.Payments : null,
                 Status = expense.Status,
                 Total = expense.Total
             };
 
-        public static ExpenseResult ForDetailedExpense(DetailedExpense expense) =>
+        public static ExpenseResult ForDetailedExpense(DetailedExpense expense, bool includePayments) =>
             new ExpenseResult
             {
                 BusinessName = expense.BusinessName,
@@ -66,6 +67,7 @@ namespace Roomies.WebAPI.Responses
                 Id = expense.Id,
                 Items = expense.Items,
                 Payee = expense.Payee,
+                Payments = includePayments ? expense.Payments : null,
                 Status = expense.Status,
                 Total = expense.Total
             };
@@ -79,8 +81,8 @@ namespace Roomies.WebAPI.Responses
             Status == other?.Status &&
             Payers == other?.Payers &&
             Payments == other?.Payments &&
-            Description == other.Description &&
-            BusinessName == other.BusinessName &&
+            Description == other?.Description &&
+            BusinessName == other?.BusinessName &&
             Distribution == other?.Distribution;
     }
 }

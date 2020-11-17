@@ -9,7 +9,11 @@ namespace Roomies.Tests.Mocks
         public Payment Payment { get; set; }
         public IEnumerable<Payment> Payments { get; set; }
 
-        public Payment Add(Payment payment) => payment;
+        public Payment Add(Payment payment)
+        {
+            Payment = payment;
+            return payment;
+        }
 
         public Payment Get(string id) => Payment;
 

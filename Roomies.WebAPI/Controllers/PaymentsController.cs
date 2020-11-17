@@ -8,6 +8,7 @@ using Roomies.WebAPI.Extensions;
 using Roomies.WebAPI.Models;
 using Roomies.WebAPI.Repositories.Interfaces;
 using Roomies.WebAPI.Requests;
+using Roomies.WebAPI.Responses;
 
 namespace Roomies.WebAPI.Controllers
 {
@@ -31,16 +32,16 @@ namespace Roomies.WebAPI.Controllers
         // GET: api/payments
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult<IEnumerable<Payment>> Get() => Ok(_payments.Get());
+        public ActionResult<IEnumerable<PaymentResult>> Get() => Ok(_payments.Get().Select(toResponse).ToList());
 
         // GET api/payments/5
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<Payment> Get(string id)
+        public ActionResult<PaymentResult> Get(string id)
         {
             var result = _payments.Get(id);
-            if (result != null) return Ok(result);
+            if (result != null) return Ok(toResponse(result, true));
 
             return NotFound();
         }
@@ -49,7 +50,7 @@ namespace Roomies.WebAPI.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(Dictionary<string, string[]>), StatusCodes.Status400BadRequest)]
-        public ActionResult<Payment> Post([FromBody] RegisterPayment payment)
+        public ActionResult<PaymentResult> Post([FromBody] RegisterPayment payment)
         {
             if (ModelState.IsValid)
             {
@@ -106,7 +107,7 @@ namespace Roomies.WebAPI.Controllers
                     _roommates.UpdateBalance(payment.PaidBy, -payment.Amount);
                     _roommates.UpdateBalance(payment.PaidTo, payment.Amount);
                     _expenses.SetPayment(payments);
-                    return CreatedAtAction(nameof(Post), new { id = result.Id }, result);
+                    return CreatedAtAction(nameof(Post), new { id = result.Id }, toResponse(result));
                 }
             }
 
@@ -124,5 +125,9 @@ namespace Roomies.WebAPI.Controllers
         //public void Delete(int id)
         //{
         //}
+
+        private PaymentResult toResponse(Payment payment) => toResponse(payment, false);
+        private PaymentResult toResponse(Payment payment, bool includesExpenses)
+            => PaymentResult.ForPayment(payment, includesExpenses);
     }
 }

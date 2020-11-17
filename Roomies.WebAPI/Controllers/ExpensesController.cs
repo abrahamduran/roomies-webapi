@@ -25,7 +25,6 @@ namespace Roomies.WebAPI.Controllers
         private readonly IExpensesRepository _expenses;
         private readonly IRoommatesRepository _roommates;
         private readonly ChannelWriter<IEnumerable<Autocomplete>> _channel;
-        private Func<Expense, ExpenseResult> toResponse = (expense) => ExpenseResult.ForExpense(expense);
 
         public ExpensesController(Channel<IEnumerable<Autocomplete>> channel, IExpensesRepository expenses, IRoommatesRepository roommates)
         {
@@ -46,7 +45,7 @@ namespace Roomies.WebAPI.Controllers
         public ActionResult<ExpenseResult> Get(string id)
         {
             var result = _expenses.Get(id);
-            if (result != null) return Ok(toResponse(result));
+            if (result != null) return Ok(toResponse(result, true));
 
             return NotFound();
         }
@@ -502,6 +501,9 @@ namespace Roomies.WebAPI.Controllers
                 _roommates.UpdateBalance(payee.Id, -total);
         }
 
+        private ExpenseResult toResponse(Expense expense) => toResponse(expense, false);
+        private ExpenseResult toResponse(Expense expense, bool includePayments)
+            => ExpenseResult.ForExpense(expense, includePayments);
 
         private class PayerEqualityComparer : IEqualityComparer<RegisterExpensePayer>
         {
