@@ -16,13 +16,16 @@ namespace Roomies.WebAPI.Models
         public IEnumerable<string> Tags { get; set; }
 
         public IEnumerable<PaymentSummary> Payments { get; set; }
+        private ExpenseStatus? _status;
+        [BsonElement("_status")]
         public ExpenseStatus Status
         {
             get
-            {
+            {   if (_status.HasValue) return _status.Value;
                 var payeeTotal = this.TotalForPayer(Payee.Id);
                 return Payments?.Sum(x => x.Value) == (Total - payeeTotal) ? ExpenseStatus.Paid : ExpenseStatus.Unpaid;
             }
+            set =>  _status = value;
         }
 
         public static implicit operator ExpenseSummary(Expense expense)
