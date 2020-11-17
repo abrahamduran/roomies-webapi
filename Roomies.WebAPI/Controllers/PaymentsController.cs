@@ -62,7 +62,7 @@ namespace Roomies.WebAPI.Controllers
 
                 var expenses = _expenses.Get(payment.ExpenseIds);
                 if (expenses.Count() != payment.ExpenseIds.Count() || !expenses.Any())
-                    ModelState.AddModelError("ExpenseIds", "One or more expenses are invalid. Please review them before submission.");
+                    ModelState.AddModelError("ExpenseIds", "At least one expense is invalid. Please review them before submission.");
 
                 if (!ModelState.IsValid) return BadRequest(ModelState);
 
@@ -83,6 +83,7 @@ namespace Roomies.WebAPI.Controllers
                 {
                     ModelState.AddModelError("Amount", "The amount introduced does not match with the total amount for the selected expenses.");
                     ModelState.AddModelError("Amount", "As of now, partial payments are yet to be supported.");
+                    ModelState.AddModelError("Amount", $"Expenses total: {totalExpense}, payment amount: {payment.Amount}, difference: {totalExpense - payment.Amount}");
                     return BadRequest(ModelState);
                 }
 
