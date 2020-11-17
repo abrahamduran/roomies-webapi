@@ -8,7 +8,7 @@ namespace Roomies.WebAPI.Responses
     {
         public string Id { get; set; }
         public string Description { get; set; }
-        public DateTime Date { get; set; }
+        public long Date { get; set; }
         public decimal Total { get; set; }
         public Payee By { get; set; }
         public Payee To { get; set; }
@@ -18,7 +18,7 @@ namespace Roomies.WebAPI.Responses
             new PaymentResult
             {
                 Id = payment.Id,
-                Date = payment.Date,
+                Date = (long)payment.Date.Subtract(DateTime.UnixEpoch).TotalSeconds,
                 Description = payment.Description,
                 To = payment.To,
                 Expenses = payment.Expenses

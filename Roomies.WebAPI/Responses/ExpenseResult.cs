@@ -10,7 +10,7 @@ namespace Roomies.WebAPI.Responses
         public string Id { get; set; }
         public string BusinessName { get; set; }
         public string Description { get; set; }
-        public DateTime Date { get; set; }
+        public long Date { get; set; }
         public decimal Total { get; set; }
         public Payee Payee { get; set; }
 
@@ -29,7 +29,7 @@ namespace Roomies.WebAPI.Responses
             {
                 Id = expense.Id,
                 BusinessName = expense.BusinessName,
-                Date = expense.Date,
+                Date = (long)expense.Date.Subtract(DateTime.UnixEpoch).TotalSeconds,
                 Description = expense.Description,
                 Payee = expense.Payee,
                 Payments = expense.Payments,
@@ -47,7 +47,7 @@ namespace Roomies.WebAPI.Responses
             new ExpenseResult
             {
                 BusinessName = expense.BusinessName,
-                Date = expense.Date,
+                Date = (long)expense.Date.Subtract(DateTime.UnixEpoch).TotalSeconds,
                 Description = expense.Description,
                 Distribution = expense.Distribution,
                 Id = expense.Id,
@@ -61,7 +61,7 @@ namespace Roomies.WebAPI.Responses
             new ExpenseResult
             {
                 BusinessName = expense.BusinessName,
-                Date = expense.Date,
+                Date = (long)expense.Date.Subtract(DateTime.UnixEpoch).TotalSeconds,
                 Description = expense.Description,
                 Id = expense.Id,
                 Items = expense.Items,
