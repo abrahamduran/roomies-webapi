@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using MongoDB.Bson;
@@ -88,7 +88,7 @@ namespace Roomies.WebAPI.Repositories.Implementations
                 var filter = Builders<Expense>.Filter.Eq(x => x.Id, x.ExpenseId);
                 var update = Builders<Expense>.Update.AddToSet(x => x.Payments, x.Summary);
                 return new UpdateOneModel<Expense>(filter, update);
-            });
+            }).ToList();
             _transactions.OfType<Expense>().BulkWrite(updates);
         }
 
