@@ -22,14 +22,5 @@ namespace Roomies.WebAPI.Extensions
 
         internal static decimal TotalForPayer(this IEnumerable<Expense> expenses, string payerId)
             => expenses.Sum(x => x.TotalForPayer(payerId));
-
-        internal static decimal TotalForPayer(this Expense expense, string payerId)
-        {
-            if (expense is SimpleExpense simple)
-                return simple.Payers.SingleOrDefault(p => p.Id == payerId)?.Amount ?? 0;
-            if (expense is DetailedExpense detailed)
-                return detailed.Items.Sum(i => i.Payers.SingleOrDefault(p => p.Id == payerId)?.Amount ?? 0);
-            return 0;
-        }
     }
 }
