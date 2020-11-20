@@ -83,7 +83,7 @@ namespace Roomies.WebAPI.Controllers
                 {
                     ModelState.AddModelError("Amount", "The amount introduced does not match with the total amount for the selected expenses.");
                     ModelState.AddModelError("Amount", "As of now, partial payments are yet to be supported.");
-                    ModelState.AddModelError("Amount", $"Expenses total: {totalExpense}, payment amount: {payment.Amount}, difference: {totalExpense - payment.Amount}");
+                    ModelState.AddModelError("Amount", $"Payment amount: {payment.Amount}, expenses total: {totalExpense}, difference: {totalExpense - payment.Amount}");
                     return BadRequest(ModelState);
                 }
 
