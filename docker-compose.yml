@@ -8,6 +8,7 @@ services:
       context: .
       dockerfile: Roomies.WebAPI/Dockerfile
     environment:
+      - TZ=${TIMEZONE}
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
     depends_on:
       - roomies.db
@@ -18,6 +19,7 @@ services:
     image: mongo:latest
     container_name: roomies.db
     environment:
+      TZ: ${TIMEZONE}
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
       MONGO_INITDB_USERNAME: ${MONGO_INITDB_USERNAME}
