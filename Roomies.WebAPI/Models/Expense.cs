@@ -43,6 +43,7 @@ namespace Roomies.WebAPI.Models
     {
         public IEnumerable<Payer> Payers { get; set; }
         public ExpenseDistribution Distribution { get; set; }
+        public bool Refundable { get; set; }
     }
 
     public class DetailedExpense : Expense
@@ -64,10 +65,11 @@ namespace Roomies.WebAPI.Models
     {
         [BsonElement("_id")]
         public int Id { get; set; }
+        public string Name { get; set; }
         [BsonRepresentation(BsonType.Decimal128)]
         public decimal Price { get; set; }
         public double Quantity { get; set; }
-        public string Name { get; set; }
+        public bool Refundable { get; set; }
         public IEnumerable<Payer> Payers { get; set; }
         public ExpenseDistribution Distribution { get; set; }
 

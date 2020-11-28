@@ -25,6 +25,7 @@ namespace Roomies.WebAPI.Requests
         [MinLength(1, ErrorMessage = "At least one payer must be selected.")]
         public IEnumerable<RegisterExpensePayer> Payers { get; set; }
         public ExpenseDistribution? Distribution { get; set; }
+        public bool? Refundable { get; set; }
 
         public static implicit operator SimpleExpense(RegisterExpense registerExpense)
         {
@@ -35,6 +36,7 @@ namespace Roomies.WebAPI.Requests
                 Total = registerExpense.Total,
                 Description = registerExpense.Description,
                 BusinessName = registerExpense.BusinessName,
+                Refundable = registerExpense.Refundable.Value,
                 Distribution = registerExpense.Distribution.Value
             };
         }
@@ -77,6 +79,7 @@ namespace Roomies.WebAPI.Requests
                 Distribution = simple.Distribution,
                 PayeeId = simple.Payee.Id,
                 Payers = simple.Payers.Select(x => RegisterExpensePayer.From(x, simple.Distribution, simple.Total)).ToList(),
+                Refundable = simple.Refundable,
                 Total = simple.Total,
                 Tags = simple.Tags
             };
@@ -138,6 +141,7 @@ namespace Roomies.WebAPI.Requests
         public IEnumerable<RegisterExpensePayer> Payers { get; set; }
         [Required]
         public ExpenseDistribution Distribution { get; set; }
+        public bool Refundable { get; set; }
 
         public decimal Total => Price * (decimal)Quantity;
 
@@ -148,6 +152,7 @@ namespace Roomies.WebAPI.Requests
                 Name = expenseItem.Name,
                 Price = expenseItem.Price,
                 Quantity = expenseItem.Quantity,
+                Refundable = expenseItem.Refundable,
                 Distribution = expenseItem.Distribution
             };
         }
@@ -156,10 +161,11 @@ namespace Roomies.WebAPI.Requests
         {
             return new RegisterExpenseItem
             {
-                Distribution = item.Distribution,
                 Name = item.Name,
                 Price = item.Price,
                 Quantity = item.Quantity,
+                Refundable = item.Refundable,
+                Distribution = item.Distribution,
                 Payers = item.Payers.Select(x => RegisterExpensePayer.From(x, item.Distribution, item.Total)).ToList()
             };
         }

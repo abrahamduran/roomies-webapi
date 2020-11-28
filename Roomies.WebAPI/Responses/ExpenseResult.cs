@@ -12,6 +12,7 @@ namespace Roomies.WebAPI.Responses
         public string Description { get; set; }
         public long Date { get; set; }
         public decimal Total { get; set; }
+        public bool Refundable { get; set; }
         public Payee Payee { get; set; }
 
         public ExpenseStatus Status { get; set; }
@@ -54,6 +55,7 @@ namespace Roomies.WebAPI.Responses
                 Payee = expense.Payee,
                 Payers = expense.Payers,
                 Payments = includePayments ? expense.Payments : null,
+                Refundable = expense.Refundable,
                 Status = expense.Status,
                 Total = expense.Total
             };
