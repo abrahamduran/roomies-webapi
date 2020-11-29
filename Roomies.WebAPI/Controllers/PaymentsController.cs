@@ -18,6 +18,8 @@ namespace Roomies.WebAPI.Controllers
     [ApiConventionType(typeof(DefaultApiConventions))]
     public class PaymentsController : Controller
     {
+        private const decimal MAX_OFFSET_VALUE = 0.1M;
+
         private readonly IPaymentsRepository _payments;
         private readonly IExpensesRepository _expenses;
         private readonly IRoommatesRepository _roommates;
@@ -79,7 +81,7 @@ namespace Roomies.WebAPI.Controllers
                 if (!ModelState.IsValid) return BadRequest(ModelState);
 
                 var totalExpense = expenses.TotalForPayer(payment.PaidBy);
-                if (totalExpense != payment.Amount)
+                if (totalExpense < payment.Amount || totalExpense > (payment.Amount + MAX_OFFSET_VALUE))
                 {
                     ModelState.AddModelError("Amount", "The amount introduced does not match with the total amount for the selected expenses.");
                     ModelState.AddModelError("Amount", "As of now, partial payments are yet to be supported.");
