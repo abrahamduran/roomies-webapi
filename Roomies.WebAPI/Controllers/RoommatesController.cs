@@ -97,7 +97,6 @@ namespace Roomies.WebAPI.Controllers
             var result = new RoommateExpenses
             {
                 Expenses = expenses.Select(x => ExpenseResult.ForPayer(x, roommate.Id)).ToList(),
-                YourTotal = expenses.TotalForPayer(roommate.Id)
             };
             return Ok(result);
         }
