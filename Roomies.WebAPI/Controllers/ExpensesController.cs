@@ -269,7 +269,7 @@ namespace Roomies.WebAPI.Controllers
             expense.Tags = expense.Tags?.Select(x => x.ToLower()).ToArray();
             if (expense.Tags?.Any(x => x.Contains(' ') || x.Contains('_')) == true)
             {
-                ModelState.AddModelError("Tags", "Tags cannot contain whitespaces. Use dashes (-) instead.");
+                ModelState.AddModelError("Tags", "Tags cannot contain whitespaces. Use only dashes (-) instead.");
                 return null;
             }
 
@@ -314,7 +314,7 @@ namespace Roomies.WebAPI.Controllers
             expense.Tags = expense.Tags?.Select(x => x.ToLower()).ToArray();
             if (expense.Tags?.Any(x => x.Contains(' ') || x.Contains('_')) == true)
             {
-                ModelState.AddModelError("Tags", "Tags cannot contain whitespaces. Use dashes (-) instead.");
+                ModelState.AddModelError("Tags", "Tags cannot contain whitespaces. Use only dashes (-) instead.");
                 return null;
             }
 
