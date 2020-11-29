@@ -5,7 +5,7 @@ using MongoDB.Bson.Serialization.Attributes;
 namespace Roomies.WebAPI.Models
 {
     [BsonKnownTypes(typeof(Payment), typeof(Expense))]
-    public class Transaction : Entity
+    public abstract class Transaction : Entity
     {
         [BsonRepresentation(BsonType.DateTime)]
         public DateTime Date { get; set; }
