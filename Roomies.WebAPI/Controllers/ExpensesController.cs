@@ -22,6 +22,9 @@ namespace Roomies.WebAPI.Controllers
     [ApiConventionType(typeof(DefaultApiConventions))]
     public class ExpensesController : Controller
     {
+        private const int ROUNDED_PLACES = 3;
+        private const decimal MAX_OFFSET_VALUE = 0.1M;
+
         private readonly IExpensesRepository _expenses;
         private readonly IRoommatesRepository _roommates;
         private readonly ChannelWriter<IEnumerable<Autocomplete>> _channel;
@@ -360,14 +363,14 @@ namespace Roomies.WebAPI.Controllers
             entity.Payers = simpleExpense.Payers.Select(x => new Payer
             {
                 Id = x.Id,
-                Amount = simpleExpense.Distribution.Value.GetAmount(simpleExpense, x).Rounded(3),
+                Amount = simpleExpense.Distribution.Value.GetAmount(simpleExpense, x).Rounded(ROUNDED_PLACES),
                 Name = roommates.Single(p => p.Id == x.Id).Name
             }).ToList();
             #endregion
 
             #region Validate Totals
             var payersTotal = entity.Payers.Sum(x => x.Amount);
-            if (payersTotal < entity.Total || payersTotal > (entity.Total + 0.1M))
+            if (payersTotal < entity.Total || payersTotal > (entity.Total + MAX_OFFSET_VALUE))
             {
                 ModelState.AddModelError("Total", "The total amount for this expense and the total amount by payers' distribution differ.");
                 ModelState.AddModelError("Total", $"Invoice total: {entity.Total}");
@@ -441,7 +444,7 @@ namespace Roomies.WebAPI.Controllers
                 return null;
             }
             var payersTotal = entity.Items.Sum(i => i.Payers.Sum(p => p.Amount));
-            if (payersTotal < entity.Total || payersTotal > (entity.Total + 0.1M))
+            if (payersTotal < entity.Total || payersTotal > (entity.Total + MAX_OFFSET_VALUE ))
             {
                 ModelState.AddModelError("Total", "The total amount for this expense and the total amount by payers' distribution differ.");
                 ModelState.AddModelError("Total", $"Invoice total: {entity.Total}");
