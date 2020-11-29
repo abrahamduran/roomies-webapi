@@ -81,7 +81,7 @@ namespace Roomies.WebAPI.Controllers
                 if (!ModelState.IsValid) return BadRequest(ModelState);
 
                 var totalExpense = expenses.TotalForPayer(payment.PaidBy);
-                if (totalExpense < payment.Amount || totalExpense > (payment.Amount + MAX_OFFSET_VALUE))
+                if (payment.Amount < totalExpense || payment.Amount > (totalExpense + MAX_OFFSET_VALUE))
                 {
                     ModelState.AddModelError("Amount", "The amount introduced does not match with the total amount for the selected expenses.");
                     ModelState.AddModelError("Amount", "As of now, partial payments are yet to be supported.");

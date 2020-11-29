@@ -530,6 +530,27 @@ namespace Roomies.Tests.UnitTests
             Assert.Equal(payment.PaidBy, _expenses.PaymentUpdates[0].Summary.By.Id);
         }
 
+        [Fact]
+        public void Post_RegisterPayment_AllowsAmountOffset()
+        {
+            // arrange
+            var controller = new PaymentsController(_payments, _expenses, _roommates);
+            var expected = 2.08M;
+            var payment = Mock.Requests.Payment(amount: 2.08M);
+            _roommates.Roommates = new List<Roommate> { Mock.Models.Roommate(id: payment.PaidBy), Mock.Models.Roommate(id: payment.PaidTo) };
+            _expenses.Expenses = payment.ExpenseIds
+                .Select(x => Mock.Models.SimpleExpense(id: x, total: 2.073M, payee: Mock.Models.Payee(id: payment.PaidTo), payers: new[] { Mock.Models.Payer(id: payment.PaidBy) }))
+                .ToList();
+
+            // act
+            var result = controller.Post(payment).Result;
+
+            // assert
+            var created = Assert.IsType<CreatedAtActionResult>(result);
+            var actual = Assert.IsAssignableFrom<PaymentResult>(created.Value);
+            Assert.Equal(expected, actual.Total);
+        }
+
         public static IEnumerable<object[]> MultiplePayersBalance
         {
             get
