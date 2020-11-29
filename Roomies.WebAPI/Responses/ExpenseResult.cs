@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using Roomies.WebAPI.Extensions;
 using Roomies.WebAPI.Models;
 
 namespace Roomies.WebAPI.Responses
@@ -25,17 +27,21 @@ namespace Roomies.WebAPI.Responses
         // Detailed
         public IEnumerable<ExpenseItem> Items { get; set; }
 
-        public static ExpenseResult ForRoommate(Expense expense) =>
-            new ExpenseResult
+        public static ExpenseResult ForPayer(Expense expense, string payerId)
+        {
+            var payment = expense.Payments?.SingleOrDefault(x => x.By.Id == payerId && x.Amount == expense.Total);
+            var status = payment != null ? ExpenseStatus.Paid : expense.Status;
+            return new ExpenseResult
             {
                 Id = expense.Id,
                 BusinessName = expense.BusinessName,
                 Date = (long)expense.Date.Subtract(DateTime.UnixEpoch).TotalSeconds,
                 Description = expense.Description,
                 Payee = expense.Payee,
-                Payments = expense.Payments,
-                Status = expense.Status
+                Status = status,
+                Total = expense.TotalForPayer(payerId)
             };
+        }
 
         public static ExpenseResult ForExpense(Expense expense, bool includePayments)
         {
