@@ -11,7 +11,7 @@ namespace Roomies.WebAPI.Responses
         public string BusinessName { get; set; }
         public string Description { get; set; }
         public long Date { get; set; }
-        public decimal Total { get; set; }
+        public decimal? Total { get; set; }
         public bool Refundable { get; set; }
         public Payee Payee { get; set; }
 
