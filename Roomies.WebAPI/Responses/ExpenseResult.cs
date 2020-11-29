@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -29,7 +29,8 @@ namespace Roomies.WebAPI.Responses
 
         public static ExpenseResult ForPayer(Expense expense, string payerId)
         {
-            var payment = expense.Payments?.SingleOrDefault(x => x.By.Id == payerId && x.Amount == expense.Total);
+            var payerTotal = expense.TotalForPayer(payerId);
+            var payment = expense.Payments?.SingleOrDefault(x => x.By.Id == payerId && x.Amount == payerTotal);
             var status = payment != null ? ExpenseStatus.Paid : expense.Status;
             return new ExpenseResult
             {
@@ -39,7 +40,7 @@ namespace Roomies.WebAPI.Responses
                 Description = expense.Description,
                 Payee = expense.Payee,
                 Status = status,
-                Total = expense.TotalForPayer(payerId)
+                Total = payerTotal
             };
         }
 

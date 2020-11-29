@@ -118,8 +118,7 @@ namespace Roomies.WebAPI.Controllers
             else if (expense is DetailedExpense detailed)
                 result.Expense = ExpenseResult.ForPayer(detailed, roommate.Id);
             
-            if (result.Expense != null)
-                return Ok(result);
+            if (result.Expense != null) return Ok(result);
 
             return NotFound();
         }
