@@ -36,7 +36,7 @@ namespace Roomies.WebAPI.Requests
                 Total = registerExpense.Total,
                 Description = registerExpense.Description,
                 BusinessName = registerExpense.BusinessName,
-                Refundable = registerExpense.Refundable.Value,
+                Refundable = registerExpense.Refundable.GetValueOrDefault(false),
                 Distribution = registerExpense.Distribution.Value
             };
         }
@@ -66,7 +66,6 @@ namespace Roomies.WebAPI.Requests
             if (expense is DetailedExpense detailed)
                 return From(detailed);
             return null;
-
         }
 
         public static RegisterExpense From(SimpleExpense simple)
