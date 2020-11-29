@@ -115,16 +115,9 @@ namespace Roomies.WebAPI.Controllers
 
             var result = new RoommateExpense();
             if (expense is SimpleExpense simple && simple.Payers.Any(x => x.Id == roommate.Id))
-            {
-                result.Expense = ExpenseResult.ForRoommate(simple);
-                result.YourTotal = simple.Payers.SingleOrDefault(x => x.Id == roommate.Id).Amount;
-            }
+                result.Expense = ExpenseResult.ForPayer(simple, roommate.Id);
             else if (expense is DetailedExpense detailed)
-            {
-                detailed.Items = detailed.Items.Where(x => x.Payers.Any(x => x.Id == roommate.Id));
-                result.Expense = detailed.Items.Any() ? ExpenseResult.ForRoommate(detailed) : null;
-                result.YourTotal = detailed.Items.Sum(i => i.Payers.SingleOrDefault(x => x.Id == roommate.Id).Amount);
-            }
+                result.Expense = ExpenseResult.ForPayer(detailed, roommate.Id);
             
             if (result.Expense != null)
                 return Ok(result);

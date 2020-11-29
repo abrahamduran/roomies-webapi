@@ -296,7 +296,7 @@ namespace Roomies.Tests.UnitTests
             // assert
             var value = Assert.IsType<OkObjectResult>(result);
             var actual = Assert.IsAssignableFrom<RoommateExpense>(value.Value);
-            Assert.Equal(expected, actual.YourTotal);
+            Assert.Equal(expected, actual.Expense.Total);
         }
 
         [Fact]
