@@ -86,7 +86,7 @@ namespace Roomies.Tests.Mocks
                     Id = id ?? Guid.NewGuid().ToString(),
                     Date = date ?? DateTime.Now,
                     By = by ?? Payee(),
-                    Value = value
+                    Amount = value
                 };
 
             internal static Payee Payee(string id = null, string name = "Jack Napier")

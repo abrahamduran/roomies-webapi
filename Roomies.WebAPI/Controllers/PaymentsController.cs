@@ -104,7 +104,7 @@ namespace Roomies.WebAPI.Controllers
                 {
                     var payments = expenses.Select(x => {
                         var summary = (PaymentSummary)result;
-                        summary.Value = x.TotalForPayer(payment.PaidBy);
+                        summary.Amount = x.TotalForPayer(payment.PaidBy);
                         return new PaymentUpdate { ExpenseId = x.Id, Summary = summary };
                     }).ToList();
                     _roommates.UpdateBalance(payment.PaidBy, -payment.Amount);

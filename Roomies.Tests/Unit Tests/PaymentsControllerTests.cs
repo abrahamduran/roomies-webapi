@@ -526,7 +526,7 @@ namespace Roomies.Tests.UnitTests
             // assert
             var created = Assert.IsType<CreatedAtActionResult>(result);
             Assert.IsAssignableFrom<PaymentResult>(created.Value);
-            Assert.Equal(payment.Amount, _expenses.PaymentUpdates[0].Summary.Value);
+            Assert.Equal(payment.Amount, _expenses.PaymentUpdates[0].Summary.Amount);
             Assert.Equal(payment.PaidBy, _expenses.PaymentUpdates[0].Summary.By.Id);
         }
 

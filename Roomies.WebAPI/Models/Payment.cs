@@ -28,9 +28,9 @@ namespace Roomies.WebAPI.Models
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; }
         public DateTime Date { get; set; }
-        [BsonElement("_value")]
+        [BsonElement("_amount")]
         [BsonRepresentation(BsonType.Decimal128)]
-        public decimal Value { get; set; }
+        public decimal Amount { get; set; }
         public Payee By { get; set; }
     }
 

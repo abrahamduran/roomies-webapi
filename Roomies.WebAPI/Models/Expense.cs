@@ -23,7 +23,7 @@ namespace Roomies.WebAPI.Models
             get
             {   if (_status.HasValue) return _status.Value;
                 var payeeTotal = this.TotalForPayer(Payee.Id);
-                return Payments?.Sum(x => x.Value) == (Total - payeeTotal) ? ExpenseStatus.Paid : ExpenseStatus.Unpaid;
+                return Payments?.Sum(x => x.Amount) == (Total - payeeTotal) ? ExpenseStatus.Paid : ExpenseStatus.Unpaid;
             }
             set =>  _status = value;
         }
