@@ -44,14 +44,14 @@ namespace Roomies.WebAPI.Repositories.Implementations
         IEnumerable<Expense> IExpensesRepository.Get(Roommate roommate)
         {
             var roommateId = ObjectId.Parse(roommate.Id);
-            var filter = Builders<Expense>.Filter.Or(new[]
+            var filterPayee = Builders<Expense>.Filter.Ne("payee._id", roommateId);
+            var filterPayer = Builders<Expense>.Filter.Or(new[]
             {
                 Builders<Expense>.Filter.Eq("payers._id", roommateId),
                 Builders<Expense>.Filter.Eq("items.payers._id", roommateId)
             });
-            var projection = Builders<Expense>.Projection.Exclude("distribution");
 
-            return _transactions.OfType<Expense>().Find(filter).Project<Expense>(projection).SortByDescending(x => x.Date).ToList();
+            return _transactions.OfType<Expense>().Find(filterPayee & filterPayer).SortByDescending(x => x.Date).ToList();
         }
 
         IEnumerable<Payment> IPaymentsRepository.Get() => _transactions.OfType<Payment>().Find(payment => true).SortByDescending(x => x.Date).ToList();
