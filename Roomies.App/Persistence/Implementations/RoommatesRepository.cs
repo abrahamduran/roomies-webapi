@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using MongoDB.Driver;
-using Roomies.WebAPI.Models;
-using Roomies.WebAPI.Repositories.Interfaces;
+using Roomies.App.Models;
+using Roomies.App.Persistence.Interfaces;
 
-namespace Roomies.WebAPI.Repositories.Implementations
+namespace Roomies.App.Persistence.Implementations
 {
     public class RoommatesRepository : IRoommatesRepository
     {

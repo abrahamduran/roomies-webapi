@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using Roomies.WebAPI.Models;
-using Roomies.WebAPI.Repositories.Interfaces;
+using Roomies.App.Models;
+using Roomies.App.Persistence.Interfaces;
 
 namespace Roomies.Tests.Mocks
 {

@@ -2,7 +2,7 @@
 using System.Linq.Expressions;
 using MongoDB.Driver;
 
-namespace Roomies.WebAPI.Repositories
+namespace Roomies.App.Persistence
 {
     public static class MongoCollectionExtensions
     {

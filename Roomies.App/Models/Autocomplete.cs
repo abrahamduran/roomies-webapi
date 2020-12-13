@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Roomies.WebAPI.Models
+namespace Roomies.App.Models
 {
     public class Autocomplete : Entity, IEquatable<Autocomplete>
     {

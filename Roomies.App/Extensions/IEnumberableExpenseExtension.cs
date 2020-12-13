@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Roomies.App.Models;
 
-namespace Roomies.WebAPI.Extensions
+namespace Roomies.App.Extensions
 {
     internal static class IEnumberableExpenseExtension
     {

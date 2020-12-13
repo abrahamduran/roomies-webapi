@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Roomies.Tests.Mocks;
 using Roomies.WebAPI.Controllers;
-using Roomies.WebAPI.Models;
+using Roomies.App.Models;
 using Roomies.WebAPI.Requests;
 using Roomies.WebAPI.Responses;
 using Xunit;

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using Roomies.WebAPI.Models;
+using Roomies.App.Models;
 
 namespace Roomies.WebAPI.Responses
 {

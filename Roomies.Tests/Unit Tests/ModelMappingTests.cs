@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Roomies.Tests.Mocks;
-using Roomies.WebAPI.Models;
+using Roomies.App.Models;
 using Roomies.WebAPI.Requests;
 using Xunit;
 

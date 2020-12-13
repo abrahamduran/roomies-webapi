@@ -1,4 +1,4 @@
-﻿namespace Roomies.WebAPI.Repositories
+﻿namespace Roomies.App.Persistence
 {
     public class RoomiesDBSettings
     {

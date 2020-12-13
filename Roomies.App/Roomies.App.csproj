@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Use Cases\" />
+    <Folder Include="Requests\" />
+    <Folder Include="Responses\" />
+    <Folder Include="Persistence\" />
+    <Folder Include="Persistence\Implementations\" />
+    <Folder Include="Persistence\Interfaces\" />
+    <Folder Include="Models\" />
+    <Folder Include="Extensions\" />
+    <Folder Include="Use Cases\Register Expense\" />
+    <Folder Include="Use Cases\Register Payment\" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="MongoDB.Driver" Version="2.11.5" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="5.0.0" />
+  </ItemGroup>
+</Project>

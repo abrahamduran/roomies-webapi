@@ -2,16 +2,16 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using Roomies.WebAPI.Models;
+using Roomies.App.Models;
 
 namespace Roomies.WebAPI.Requests
 {
     public class RegisterExpense
     {
-        [Required, DataType(DataType.Currency)]
+        [Required(ErrorMessage = "Please enter a valid value. The {0} field requires values greater than 0."), DataType(DataType.Currency)]
         [Range(1, double.MaxValue, ErrorMessage = "Please enter a valid value. The {0} field requires values greater than 0.")]
         public decimal Total { get; set; }
-        [Required, DataType(DataType.Date)]
+        [Required(ErrorMessage = "The {0} field cannot be empty."), DataType(DataType.Date)]
         public DateTime Date { get; set; }
         [Required, MaxLength(30)]
         public string BusinessName { get; set; }

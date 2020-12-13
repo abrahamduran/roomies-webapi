@@ -8,11 +8,7 @@
 
 
   <ItemGroup>
-    <Folder Include="Models\" />
-    <Folder Include="Repositories\" />
     <Folder Include="Requests\" />
-    <Folder Include="Repositories\Interfaces\" />
-    <Folder Include="Repositories\Implementations\" />
     <Folder Include="Extensions\" />
     <Folder Include="HostedService\" />
     <Folder Include="Responses\" />
@@ -21,5 +17,10 @@
     <PackageReference Include="Microsoft.AspNetCore.JsonPatch" Version="3.1.9" />
     <PackageReference Include="MongoDB.Driver" Version="2.11.3" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Roomies.App\Roomies.App.csproj">
+      <GlobalPropertiesToRemove></GlobalPropertiesToRemove>
+    </ProjectReference>
   </ItemGroup>
 </Project>

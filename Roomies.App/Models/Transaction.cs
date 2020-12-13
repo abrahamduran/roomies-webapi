@@ -2,7 +2,7 @@
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace Roomies.WebAPI.Models
+namespace Roomies.App.Models
 {
     [BsonKnownTypes(typeof(Payment), typeof(Expense))]
     public abstract class Transaction : Entity

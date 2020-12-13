@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace Roomies.WebAPI.Models
+namespace Roomies.App.Models
 {
     public class Payment : Transaction
     {

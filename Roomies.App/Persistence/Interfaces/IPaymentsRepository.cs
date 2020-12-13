@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using Roomies.WebAPI.Models;
+﻿using System.Collections.Generic;
+using Roomies.App.Models;
 
-namespace Roomies.WebAPI.Repositories.Interfaces
+namespace Roomies.App.Persistence.Interfaces
 {
     public interface IPaymentsRepository
     {

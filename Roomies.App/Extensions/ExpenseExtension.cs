@@ -1,12 +1,11 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using Roomies.App.Models;
 
-namespace Roomies.WebAPI.Extensions
+namespace Roomies.App.Extensions
 {
     public static class ExpenseExtension
     {
-        internal static decimal TotalForPayer(this Expense expense, string payerId)
+        public static decimal TotalForPayer(this Expense expense, string payerId)
         {
             if (expense is SimpleExpense simple)
                 return simple.Payers.SingleOrDefault(p => p.Id == payerId)?.Amount ?? 0;

@@ -13,10 +13,10 @@ using Microsoft.OpenApi.Models;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Conventions;
 using Roomies.WebAPI.HostedService;
-using Roomies.WebAPI.Models;
-using Roomies.WebAPI.Repositories;
-using Roomies.WebAPI.Repositories.Implementations;
-using Roomies.WebAPI.Repositories.Interfaces;
+using Roomies.App.Models;
+using Roomies.App.Persistence.Implementations;
+using Roomies.App.Persistence.Interfaces;
+using Roomies.App.Persistence;
 
 namespace Roomies.WebAPI
 {

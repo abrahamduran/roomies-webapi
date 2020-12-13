@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Roomies.Tests.Mocks;
 using Roomies.WebAPI.Controllers;
-using Roomies.WebAPI.Models;
+using Roomies.App.Models;
 using Xunit;
 
 namespace Roomies.Tests.UnitTests

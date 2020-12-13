@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
-using Roomies.WebAPI.Extensions;
+using Roomies.App.Extensions;
 
-namespace Roomies.WebAPI.Models
+namespace Roomies.App.Models
 {
     [BsonDiscriminator(RootClass = true)]
     [BsonKnownTypes(typeof(SimpleExpense), typeof(DetailedExpense))]

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Roomies.WebAPI.Models;
+using Roomies.App.Models;
 
 namespace Roomies.WebAPI.Responses
 {

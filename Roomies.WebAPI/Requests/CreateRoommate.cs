@@ -1,6 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-using Roomies.WebAPI.Models;
+using Roomies.App.Models;
 
 namespace Roomies.WebAPI.Requests
 {

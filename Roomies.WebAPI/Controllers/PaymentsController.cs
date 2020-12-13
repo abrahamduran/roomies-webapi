@@ -4,9 +4,9 @@ using System.Linq;
 using System.Net.Mime;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Roomies.App.Models;
+using Roomies.App.Persistence.Interfaces;
 using Roomies.WebAPI.Extensions;
-using Roomies.WebAPI.Models;
-using Roomies.WebAPI.Repositories.Interfaces;
 using Roomies.WebAPI.Requests;
 using Roomies.WebAPI.Responses;
 

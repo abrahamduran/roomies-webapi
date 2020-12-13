@@ -1,5 +1,5 @@
 ﻿using System;
-using Roomies.WebAPI.Models;
+using Roomies.App.Models;
 using Roomies.WebAPI.Requests;
 
 namespace Roomies.WebAPI.Extensions

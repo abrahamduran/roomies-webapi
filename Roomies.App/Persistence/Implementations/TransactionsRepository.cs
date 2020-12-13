@@ -1,12 +1,12 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using Roomies.WebAPI.Models;
-using Roomies.WebAPI.Repositories.Interfaces;
+using Roomies.App.Models;
+using Roomies.App.Persistence.Interfaces;
 
-namespace Roomies.WebAPI.Repositories.Implementations
+namespace Roomies.App.Persistence.Implementations
 {
     public class TransactionsRepository : ITransactionsRepository, IPaymentsRepository, IExpensesRepository
     {
@@ -87,6 +87,17 @@ namespace Roomies.WebAPI.Repositories.Implementations
             {
                 var filter = Builders<Expense>.Filter.Eq(x => x.Id, x.ExpenseId);
                 var update = Builders<Expense>.Update.AddToSet(x => x.Payments, x.Summary);
+                return new UpdateOneModel<Expense>(filter, update);
+            }).ToList();
+            _transactions.OfType<Expense>().BulkWrite(updates);
+        }
+
+        void IExpensesRepository.UnsetPayment(string paymentId, IEnumerable<ExpenseSummary> expenses)
+        {
+            var updates = expenses.Select(x =>
+            {
+                var filter = Builders<Expense>.Filter.Eq(x => x.Id, x.Id);
+                var update = Builders<Expense>.Update.PullFilter(x => x.Payments, x => x.Id == paymentId);
                 return new UpdateOneModel<Expense>(filter, update);
             }).ToList();
             _transactions.OfType<Expense>().BulkWrite(updates);

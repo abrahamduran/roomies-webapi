@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Net.Mime;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Roomies.App.Models;
+using Roomies.App.Persistence.Interfaces;
 using Roomies.WebAPI.Extensions;
-using Roomies.WebAPI.Models;
-using Roomies.WebAPI.Repositories.Interfaces;
 using Roomies.WebAPI.Requests;
 
 namespace Roomies.WebAPI.Controllers
@@ -30,7 +31,7 @@ namespace Roomies.WebAPI.Controllers
             if (string.IsNullOrEmpty(text))
                 return BadRequest("Text cannot be empty or null. Please provide a value");
 
-            return Ok(_autocomplete.Search(text, field.GetFieldType()));
+            return Ok(_autocomplete.Search(text, GetFieldType(field)));
         }
 
         // POST api/values
@@ -47,6 +48,32 @@ namespace Roomies.WebAPI.Controllers
             }
 
             return BadRequest(ModelState);
+        }
+
+        internal AutocompleteType? GetFieldType(AutocompletableField field)
+        {
+            switch (field)
+            {
+                case AutocompletableField.BusinessName:
+                    return AutocompleteType.BusinessName;
+                case AutocompletableField.ItemName:
+                    return AutocompleteType.ItemName;
+                case AutocompletableField.All:
+                    return null;
+            }
+            throw new NotImplementedException($"AutocompletableField case {field} was not properly handled in GetFieldType.");
+        }
+
+        internal AutocompleteType GetFieldType(IndexAutocompletableField field)
+        {
+            switch (field)
+            {
+                case IndexAutocompletableField.BusinessName:
+                    return AutocompleteType.BusinessName;
+                case IndexAutocompletableField.ItemName:
+                    return AutocompleteType.ItemName;
+            }
+            throw new NotImplementedException($"AutocompletableField case {field} was not properly handled in GetFieldType.");
         }
     }
 }

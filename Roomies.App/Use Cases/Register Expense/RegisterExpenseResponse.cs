@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using Roomies.WebAPI.Extensions;
+using Roomies.App.Extensions;
 using Roomies.App.Models;
 
-namespace Roomies.WebAPI.Responses
+namespace Roomies.App.UseCases.RegisterExpense
 {
-    public class ExpenseResult : IEquatable<ExpenseResult>
+    public class Response : IEquatable<Response>
     {
         public string Id { get; set; }
         public string BusinessName { get; set; }
@@ -27,12 +27,12 @@ namespace Roomies.WebAPI.Responses
         // Detailed
         public IEnumerable<ExpenseItem> Items { get; set; }
 
-        public static ExpenseResult ForPayer(Expense expense, string payerId)
+        public static Response ForPayer(Expense expense, string payerId)
         {
             var payerTotal = expense.TotalForPayer(payerId);
             var payment = expense.Payments?.SingleOrDefault(x => x.By.Id == payerId && x.Amount == payerTotal);
             var status = payment != null ? ExpenseStatus.Paid : expense.Status;
-            return new ExpenseResult
+            return new Response
             {
                 Id = expense.Id,
                 BusinessName = expense.BusinessName,
@@ -44,15 +44,15 @@ namespace Roomies.WebAPI.Responses
             };
         }
 
-        public static ExpenseResult ForExpense(Expense expense, bool includePayments)
+        public static Response ForExpense(Expense expense, bool includePayments)
         {
             if (expense is SimpleExpense simple) return ForSimpleExpense(simple, includePayments);
             if (expense is DetailedExpense detailed) return ForDetailedExpense(detailed, includePayments);
             return null;
         }
 
-        public static ExpenseResult ForSimpleExpense(SimpleExpense expense, bool includePayments) =>
-            new ExpenseResult
+        public static Response ForSimpleExpense(SimpleExpense expense, bool includePayments) =>
+            new Response
             {
                 BusinessName = expense.BusinessName,
                 Date = (long)expense.Date.Subtract(DateTime.UnixEpoch).TotalSeconds,
@@ -67,8 +67,8 @@ namespace Roomies.WebAPI.Responses
                 Total = expense.Total
             };
 
-        public static ExpenseResult ForDetailedExpense(DetailedExpense expense, bool includePayments) =>
-            new ExpenseResult
+        public static Response ForDetailedExpense(DetailedExpense expense, bool includePayments) =>
+            new Response
             {
                 BusinessName = expense.BusinessName,
                 Date = (long)expense.Date.Subtract(DateTime.UnixEpoch).TotalSeconds,
@@ -81,7 +81,7 @@ namespace Roomies.WebAPI.Responses
                 Total = expense.Total
             };
 
-        public bool Equals([AllowNull] ExpenseResult other) =>
+        public bool Equals([AllowNull] Response other) =>
             Id == other?.Id &&
             Date == other?.Date &&
             Items == other?.Items &&

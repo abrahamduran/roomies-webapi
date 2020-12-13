@@ -4,16 +4,18 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Core.Events;
 
-namespace Roomies.WebAPI.Repositories
+namespace Roomies.App.Persistence
 {
     public class MongoDBContext
     {
         private readonly MongoClient _client;
         internal readonly IMongoDatabase database;
 
-        public MongoDBContext(IOptions<RoomiesDBSettings> settings)
+        public MongoDBContext(IOptions<RoomiesDBSettings> settings) : this(settings.Value) { }
+
+        public MongoDBContext(RoomiesDBSettings settings)
         {
-            var mongoUrl = new MongoUrl($"{settings.Value.ConnectionString}{settings.Value.DatabaseName}");
+            var mongoUrl = new MongoUrl($"{settings.ConnectionString}{settings.DatabaseName}");
             var mongoSettings = MongoClientSettings.FromUrl(mongoUrl);
 #if DEBUG
             Console.WriteLine("DEBUG");
@@ -24,7 +26,7 @@ namespace Roomies.WebAPI.Repositories
             };
 #endif
             _client = new MongoClient(mongoSettings);
-            database = _client.GetDatabase(settings.Value.DatabaseName);
+            database = _client.GetDatabase(settings.DatabaseName);
         }
     }
 }

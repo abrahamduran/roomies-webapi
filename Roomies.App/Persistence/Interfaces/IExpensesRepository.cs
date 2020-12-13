@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using Roomies.WebAPI.Models;
+﻿using System.Collections.Generic;
+using Roomies.App.Models;
 
-namespace Roomies.WebAPI.Repositories.Interfaces
+namespace Roomies.App.Persistence.Interfaces
 {
     public interface IExpensesRepository
     {
@@ -16,5 +15,6 @@ namespace Roomies.WebAPI.Repositories.Interfaces
         ExpenseItem GetItem(string expenseId, int itemId);
         IEnumerable<ExpenseItem> GetItems(string expenseId);
         void SetPayment(IEnumerable<PaymentUpdate> payments);
+        void UnsetPayment(string paymentId, IEnumerable<ExpenseSummary> expenses);
     }
 }

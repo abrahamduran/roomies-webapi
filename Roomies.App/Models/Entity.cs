@@ -1,8 +1,7 @@
-﻿using System;
-using MongoDB.Bson;
+﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace Roomies.WebAPI.Models
+namespace Roomies.App.Models
 {
     public abstract class Entity
     {
