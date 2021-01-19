@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Roomies.App.Models;
@@ -47,6 +47,15 @@ namespace Roomies.Tests.Mocks
                 if (expense.Payments == null)
                     expense.Payments = new List<PaymentSummary>();
                 ((List<PaymentSummary>)expense.Payments).Add(update.Summary);
+            }
+        }
+
+        void IExpensesRepository.UnsetPayment(string paymentId, IEnumerable<ExpenseSummary> expenses)
+        {
+            foreach (var item in expenses)
+            {
+                var expense = Expenses.Single(x => x.Id == item.Id);
+                expense.Payments = null;
             }
         }
     }

@@ -64,7 +64,18 @@ namespace Roomies.WebAPI.Controllers
 
                 var expenses = _expenses.Get(payment.ExpenseIds);
                 if (expenses.Count() != payment.ExpenseIds.Count() || !expenses.Any())
+                {
                     ModelState.AddModelError("ExpenseIds", "At least one expense is invalid. Please review them before submission.");
+                    foreach (var expense in expenses.Where(x => !payment.ExpenseIds.Contains(x.Id)).ToList())
+                        ModelState.AddModelError("ExpenseIds", $"Invalid expense: {expense.Id}");
+                }
+
+                if (expenses.Any(x => x.Status == ExpenseStatus.Paid))
+                {
+                    ModelState.AddModelError("ExpenseIds", "At least one expense has already been paid. Please review them before submission.");
+                    foreach (var expense in expenses.Where(x => x.Status == ExpenseStatus.Paid).ToList())
+                        ModelState.AddModelError("ExpenseIds", $"Paid expense: {expense.Id}");
+                }
 
                 if (!ModelState.IsValid) return BadRequest(ModelState);
 
@@ -72,6 +83,8 @@ namespace Roomies.WebAPI.Controllers
                 {
                     ModelState.AddModelError("PaidBy", "The selected payer is invalid for the selected expenses.");
                     ModelState.AddModelError("ExpenseIds", "At least one expense does not contains the selected payer.");
+                    foreach (var expense in expenses.Where(x => x.Status == ExpenseStatus.Paid).ToList())
+                        ModelState.AddModelError("ExpenseIds", $"Paid expense: {expense.Id}");
                 }
                 if (!expenses.ContainsPayee(payment.PaidTo))
                 {
@@ -123,11 +136,21 @@ namespace Roomies.WebAPI.Controllers
         //{
         //}
 
-        //// DELETE api/payments/5
-        //[HttpDelete("{id}")]
-        //public void Delete(int id)
-        //{
-        //}
+        // DELETE api/payments/5
+        [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public ActionResult Delete(string id)
+        {
+            var payment = _payments.Get(id);
+            if (payment == null) return NotFound();
+
+            _expenses.UnsetPayment(payment.Id, payment.Expenses);
+            _roommates.UpdateBalance(payment.By.Id, payment.Total);
+            _roommates.UpdateBalance(payment.To.Id, -payment.Total);
+
+            return NoContent();
+        }
 
         private PaymentResult toResponse(Payment payment) => toResponse(payment, false);
         private PaymentResult toResponse(Payment payment, bool includesExpenses)
