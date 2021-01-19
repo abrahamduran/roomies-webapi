@@ -10,6 +10,8 @@ services:
     environment:
       - TZ=${TIMEZONE}
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      - RoomiesDBSettings__ConnectionString=${MONGO_CONNECTION_STRING}
+      - RoomiesDBSettings__DatabaseName=${MONGO_INITDB_DATABASE}
     depends_on:
       - roomies.db
     links:
