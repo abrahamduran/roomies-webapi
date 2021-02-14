@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Roomies.App.UseCases
 {
-    public class UseCaseException: ApplicationException
+    public class UseCaseException : ApplicationException
     {
         public Dictionary<string, IList<string>> Errors { get; set; }
 

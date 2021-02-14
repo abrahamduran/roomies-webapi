@@ -1,5 +1,6 @@
 ﻿using System;
 using Roomies.App.Models;
+using Roomies.App.UseCases.RegisterPayment;
 using Roomies.WebAPI.Requests;
 
 namespace Roomies.Tests.Mocks
@@ -174,10 +175,10 @@ namespace Roomies.Tests.Mocks
                     Payers = payers ?? new[] { Payer(), Payer() }
                 };
 
-            internal static RegisterPayment Payment(
+            internal static RegisterPaymentRequest Payment(
                 decimal amount = 1, string paidBy = null, string paidTo = null,
                 string[] expenseIds = null, string description = "Lorem ipsum dolor sit amet")
-                => new RegisterPayment
+                => new RegisterPaymentRequest
                 {
                     Amount = amount,
                     PaidBy = paidBy ?? Guid.NewGuid().ToString(),

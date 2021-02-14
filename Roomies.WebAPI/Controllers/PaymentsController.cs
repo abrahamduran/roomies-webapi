@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Roomies.App.Models;
 using Roomies.App.Persistence.Interfaces;
+using Roomies.App.UseCases;
+using Roomies.App.UseCases.RegisterPayment;
 using Roomies.WebAPI.Extensions;
 using Roomies.WebAPI.Requests;
 using Roomies.WebAPI.Responses;
@@ -52,82 +54,20 @@ namespace Roomies.WebAPI.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(Dictionary<string, string[]>), StatusCodes.Status400BadRequest)]
-        public ActionResult<PaymentResult> Post([FromBody] RegisterPayment payment)
+        public ActionResult<RegisterPaymentResponse> Post([FromServices] RegisterPaymentHandler handler, [FromBody] RegisterPaymentRequest payment)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            try
             {
-                var roommates = _roommates.Get(new[] { payment.PaidTo, payment.PaidBy }).ToDictionary(x => x.Id);
-                if (!roommates.ContainsKey(payment.PaidBy))
-                    ModelState.AddModelError("PaidBy", "The PaidBy field is invalid. Please review it.");
-                if (!roommates.ContainsKey(payment.PaidTo))
-                    ModelState.AddModelError("PaidTo", "The PaidBy field is invalid. Please review it.");
-
-                var expenses = _expenses.Get(payment.ExpenseIds);
-                if (expenses.Count() != payment.ExpenseIds.Count() || !expenses.Any())
-                {
-                    ModelState.AddModelError("ExpenseIds", "At least one expense is invalid. Please review them before submission.");
-                    foreach (var expense in expenses.Where(x => !payment.ExpenseIds.Contains(x.Id)).ToList())
-                        ModelState.AddModelError("ExpenseIds", $"Invalid expense: {expense.Id}");
-                }
-
-                if (expenses.Any(x => x.Status == ExpenseStatus.Paid))
-                {
-                    ModelState.AddModelError("ExpenseIds", "At least one expense has already been paid. Please review them before submission.");
-                    foreach (var expense in expenses.Where(x => x.Status == ExpenseStatus.Paid).ToList())
-                        ModelState.AddModelError("ExpenseIds", $"Paid expense: {expense.Id}");
-                }
-
-                if (!ModelState.IsValid) return BadRequest(ModelState);
-
-                if (!expenses.ContainsPayer(payment.PaidBy))
-                {
-                    ModelState.AddModelError("PaidBy", "The selected payer is invalid for the selected expenses.");
-                    ModelState.AddModelError("ExpenseIds", "At least one expense does not contains the selected payer.");
-                    foreach (var expense in expenses.Where(x => x.Status == ExpenseStatus.Paid).ToList())
-                        ModelState.AddModelError("ExpenseIds", $"Paid expense: {expense.Id}");
-                }
-                if (!expenses.ContainsPayee(payment.PaidTo))
-                {
-                    ModelState.AddModelError("PaidTo", "The selected payee is invalid for the selected expenses.");
-                    ModelState.AddModelError("ExpenseIds", "At least one expense does not contains the selected payee.");
-                }
-                if (!ModelState.IsValid) return BadRequest(ModelState);
-
-                var totalExpense = expenses.TotalForPayer(payment.PaidBy);
-                if (payment.Amount < totalExpense || payment.Amount > (totalExpense + MAX_OFFSET_VALUE))
-                {
-                    ModelState.AddModelError("Amount", "The amount introduced does not match with the total amount for the selected expenses.");
-                    ModelState.AddModelError("Amount", "As of now, partial payments are yet to be supported.");
-                    ModelState.AddModelError("Amount", $"Payment amount: {payment.Amount}, expenses total: {totalExpense}, difference: {totalExpense - payment.Amount}");
-                    return BadRequest(ModelState);
-                }
-
-                var entity = new Payment
-                {
-                    By = new Payee { Id = payment.PaidBy, Name = roommates[payment.PaidBy].Name },
-                    To = new Payee { Id = payment.PaidTo, Name = roommates[payment.PaidTo].Name },
-                    Expenses = expenses.Select(x => (ExpenseSummary)x).ToList(),
-                    Description = payment.Description,
-                    Total = payment.Amount,
-                    Date = DateTime.Now
-                };
-
-                var result = _payments.Add(entity);
-                if (result != null)
-                {
-                    var payments = expenses.Select(x => {
-                        var summary = (PaymentSummary)result;
-                        summary.Amount = x.TotalForPayer(payment.PaidBy);
-                        return new PaymentUpdate { ExpenseId = x.Id, Summary = summary };
-                    }).ToList();
-                    _roommates.UpdateBalance(payment.PaidBy, -payment.Amount);
-                    _roommates.UpdateBalance(payment.PaidTo, payment.Amount);
-                    _expenses.SetPayment(payments);
-                    return CreatedAtAction(nameof(Post), new { id = result.Id }, toResponse(result));
-                }
+                var result = handler.Execute(payment);
+                return CreatedAtAction(nameof(Post), new { id = result.Id }, result);
             }
-
-            return BadRequest(ModelState);
+            catch (UseCaseException ex)
+            {
+                return BadRequest(ex.ToModelState(ModelState));
+            }
         }
 
         //// PUT api/payments/5

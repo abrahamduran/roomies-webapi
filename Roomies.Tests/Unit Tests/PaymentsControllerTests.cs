@@ -7,6 +7,7 @@ using Roomies.WebAPI.Controllers;
 using Roomies.App.Models;
 using Roomies.WebAPI.Responses;
 using Xunit;
+using Roomies.App.UseCases.RegisterPayment;
 
 namespace Roomies.Tests.UnitTests
 {
@@ -15,13 +16,14 @@ namespace Roomies.Tests.UnitTests
         private readonly ExpensesRepositoryMock _expenses;
         private readonly PaymentsRepositoryMock _payments;
         private readonly RoommatesRepositoryMock _roommates;
-
+        private readonly RegisterPaymentHandler _handler;
 
         public PaymentsControllerTests()
         {
             _expenses = new ExpensesRepositoryMock();
             _payments = new PaymentsRepositoryMock();
             _roommates = new RoommatesRepositoryMock();
+            _handler = new RegisterPaymentHandler(_payments, _expenses, _roommates);
         }
 
         [Fact]
@@ -101,7 +103,7 @@ namespace Roomies.Tests.UnitTests
             _expenses.Expenses = new List<Expense>();
 
             // act
-            var result = controller.Post(payment).Result;
+            var result = controller.Post(_handler, payment).Result;
 
             // assert
             var badRequest = Assert.IsType<BadRequestObjectResult>(result);
@@ -122,12 +124,35 @@ namespace Roomies.Tests.UnitTests
             _expenses.Expenses = payment.ExpenseIds.Select(x => Mock.Models.SimpleExpense(id: x)).ToList();
 
             // act
-            var result = controller.Post(payment).Result;
+            var result = controller.Post(_handler, payment).Result;
 
             // assert
             var badRequest = Assert.IsType<BadRequestObjectResult>(result);
             var errors = Assert.IsAssignableFrom<SerializableError>(badRequest.Value);
             Assert.Single(errors);
+            Assert.True(errors.ContainsKey("PaidTo"));
+        }
+
+        [Fact]
+        public void Post_RegisterPaymentWithSamePaidByAndPaidTo_ProducesBadRequestResult()
+        {
+            // arrange
+            var controller = new PaymentsController(_payments, _expenses, _roommates);
+            var roommate = Mock.Models.Roommate();
+            var payment = Mock.Requests.Payment(paidBy: roommate.Id, paidTo: roommate.Id, expenseIds: new[] { Guid.NewGuid().ToString() });
+            _roommates.Roommates = new List<Roommate> { roommate };
+            var payee = Mock.Models.Payee(id: payment.PaidTo);
+            var payers = new[] { Mock.Models.Payer(id: payment.PaidBy) };
+            _expenses.Expenses = payment.ExpenseIds.Select(x => Mock.Models.SimpleExpense(id: x, payee: payee, payers: payers)).ToList();
+
+            // act
+            var result = controller.Post(_handler, payment).Result;
+
+            // assert
+            var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+            var errors = Assert.IsAssignableFrom<SerializableError>(badRequest.Value);
+            Assert.Equal(2, errors.Count);
+            Assert.True(errors.ContainsKey("PaidBy"));
             Assert.True(errors.ContainsKey("PaidTo"));
         }
 
@@ -141,7 +166,7 @@ namespace Roomies.Tests.UnitTests
             _expenses.Expenses = payment.ExpenseIds.Select(x => Mock.Models.SimpleExpense(id: x)).ToList();
 
             // act
-            var result = controller.Post(payment).Result;
+            var result = controller.Post(_handler, payment).Result;
 
             // assert
             var badRequest = Assert.IsType<BadRequestObjectResult>(result);
@@ -160,7 +185,7 @@ namespace Roomies.Tests.UnitTests
             _expenses.Expenses = new List<Expense>();
 
             // act
-            var result = controller.Post(payment).Result;
+            var result = controller.Post(_handler, payment).Result;
 
             // assert
             var badRequest = Assert.IsType<BadRequestObjectResult>(result);
@@ -179,7 +204,7 @@ namespace Roomies.Tests.UnitTests
             _expenses.Expenses = new List<Expense>();
 
             // act
-            var result = controller.Post(payment).Result;
+            var result = controller.Post(_handler, payment).Result;
 
             // assert
             var badRequest = Assert.IsType<BadRequestObjectResult>(result);
@@ -198,7 +223,7 @@ namespace Roomies.Tests.UnitTests
             _expenses.Expenses = payment.ExpenseIds.Select(x => Mock.Models.SimpleExpense(id: x)).ToList();
 
             // act
-            var result = controller.Post(payment).Result;
+            var result = controller.Post(_handler, payment).Result;
 
             // assert
             var badRequest = Assert.IsType<BadRequestObjectResult>(result);
@@ -219,7 +244,7 @@ namespace Roomies.Tests.UnitTests
             _expenses.Expenses = payment.ExpenseIds.Select(x => Mock.Models.SimpleExpense(id: x, payee: Mock.Models.Payee(id: payment.PaidTo))).ToList();
 
             // act
-            var result = controller.Post(payment).Result;
+            var result = controller.Post(_handler, payment).Result;
 
             // assert
             var badRequest = Assert.IsType<BadRequestObjectResult>(result);
@@ -239,7 +264,7 @@ namespace Roomies.Tests.UnitTests
             _expenses.Expenses = payment.ExpenseIds.Select(x => Mock.Models.SimpleExpense(id: x, payers: new[] { Mock.Models.Payer(id: payment.PaidBy) })).ToList();
 
             // act
-            var result = controller.Post(payment).Result;
+            var result = controller.Post(_handler, payment).Result;
 
             // assert
             var badRequest = Assert.IsType<BadRequestObjectResult>(result);
@@ -259,7 +284,7 @@ namespace Roomies.Tests.UnitTests
             _expenses.Expenses = payment.ExpenseIds.Select(x => Mock.Models.SimpleExpense(id: x, payee: Mock.Models.Payee(id: payment.PaidTo), payers: new[] { Mock.Models.Payer(id: payment.PaidBy) })).ToList();
 
             // act
-            var result = controller.Post(payment).Result;
+            var result = controller.Post(_handler, payment).Result;
 
             // assert
             var badRequest = Assert.IsType<BadRequestObjectResult>(result);
@@ -279,11 +304,11 @@ namespace Roomies.Tests.UnitTests
             _expenses.Expenses = payment.ExpenseIds.Select(x => Mock.Models.SimpleExpense(id: x, payee: Mock.Models.Payee(id: payment.PaidTo), payers: new[] { Mock.Models.Payer(id: payment.PaidBy) })).ToList();
 
             // act
-            var result = controller.Post(payment).Result;
+            var result = controller.Post(_handler, payment).Result;
 
             // assert
             var created = Assert.IsType<CreatedAtActionResult>(result);
-            var actual = Assert.IsAssignableFrom<PaymentResult>(created.Value);
+            var actual = Assert.IsAssignableFrom<RegisterPaymentResponse>(created.Value);
             var date = DateTime.UnixEpoch.AddSeconds(actual.Date).ToShortDateString();
             Assert.Equal(expected, date);
         }
@@ -298,11 +323,11 @@ namespace Roomies.Tests.UnitTests
             _expenses.Expenses = payment.ExpenseIds.Select(x => Mock.Models.SimpleExpense(id: x, payee: Mock.Models.Payee(id: payment.PaidTo), payers: new[] { Mock.Models.Payer(id: payment.PaidBy) })).ToList();
 
             // act
-            var result = controller.Post(payment).Result;
+            var result = controller.Post(_handler, payment).Result;
 
             // assert
             var created = Assert.IsType<CreatedAtActionResult>(result);
-            var actual = Assert.IsAssignableFrom<PaymentResult>(created.Value);
+            var actual = Assert.IsAssignableFrom<RegisterPaymentResponse>(created.Value);
             Assert.Null(actual.Expenses);
         }
 
@@ -317,11 +342,11 @@ namespace Roomies.Tests.UnitTests
             _expenses.Expenses = payment.ExpenseIds.Select(x => Mock.Models.SimpleExpense(id: x, payee: Mock.Models.Payee(id: payment.PaidTo), payers: new[] { Mock.Models.Payer(id: payment.PaidBy) })).ToList();
 
             // act
-            var result = controller.Post(payment).Result;
+            var result = controller.Post(_handler, payment).Result;
 
             // assert
             var created = Assert.IsType<CreatedAtActionResult>(result);
-            Assert.IsAssignableFrom<PaymentResult>(created.Value);
+            Assert.IsAssignableFrom<RegisterPaymentResponse>(created.Value);
             Assert.Equal(expected, _payments.Payment.Expenses.Select(x => x.Id).ToArray());
         }
 
@@ -349,11 +374,11 @@ namespace Roomies.Tests.UnitTests
             ).ToList();
 
             // act
-            var result = controller.Post(payment).Result;
+            var result = controller.Post(_handler, payment).Result;
 
             // assert
             var created = Assert.IsType<CreatedAtActionResult>(result);
-            var actual = Assert.IsAssignableFrom<PaymentResult>(created.Value);
+            var actual = Assert.IsAssignableFrom<RegisterPaymentResponse>(created.Value);
             Assert.Equal(expected, payer.Balance);
         }
 
@@ -382,11 +407,11 @@ namespace Roomies.Tests.UnitTests
             ).ToList();
 
             // act
-            var result = controller.Post(payment).Result;
+            var result = controller.Post(_handler, payment).Result;
 
             // assert
             var created = Assert.IsType<CreatedAtActionResult>(result);
-            var actual = Assert.IsAssignableFrom<PaymentResult>(created.Value);
+            var actual = Assert.IsAssignableFrom<RegisterPaymentResponse>(created.Value);
             Assert.Equal(expected, payee.Balance);
         }
 
@@ -414,11 +439,11 @@ namespace Roomies.Tests.UnitTests
             ).ToList();
 
             // act
-            var result = controller.Post(payment).Result;
+            var result = controller.Post(_handler, payment).Result;
 
             // assert
             var created = Assert.IsType<CreatedAtActionResult>(result);
-            var actual = Assert.IsAssignableFrom<PaymentResult>(created.Value);
+            var actual = Assert.IsAssignableFrom<RegisterPaymentResponse>(created.Value);
             Assert.Equal(expected, roommatePayers.Select(x => x.Balance).ToArray());
         }
 
@@ -440,11 +465,11 @@ namespace Roomies.Tests.UnitTests
             _expenses.Expenses = new List<Expense> { expense };
 
             // act
-            var result = controller.Post(payment).Result;
+            var result = controller.Post(_handler, payment).Result;
 
             // assert
             var created = Assert.IsType<CreatedAtActionResult>(result);
-            Assert.IsAssignableFrom<PaymentResult>(created.Value);
+            Assert.IsAssignableFrom<RegisterPaymentResponse>(created.Value);
             Assert.Equal(ExpenseStatus.Unpaid, expense.Status);
         }
 
@@ -466,11 +491,11 @@ namespace Roomies.Tests.UnitTests
             _expenses.Expenses = new List<Expense> { expense };
 
             // act
-            var result = controller.Post(payment).Result;
+            var result = controller.Post(_handler, payment).Result;
 
             // assert
             var created = Assert.IsType<CreatedAtActionResult>(result);
-            Assert.IsAssignableFrom<PaymentResult>(created.Value);
+            Assert.IsAssignableFrom<RegisterPaymentResponse>(created.Value);
             Assert.Equal(ExpenseStatus.Paid, expense.Status);
         }
 
@@ -495,11 +520,11 @@ namespace Roomies.Tests.UnitTests
             _expenses.Expenses = new List<Expense> { expense };
 
             // act
-            var result = controller.Post(payment).Result;
+            var result = controller.Post(_handler, payment).Result;
 
             // assert
             var created = Assert.IsType<CreatedAtActionResult>(result);
-            Assert.IsAssignableFrom<PaymentResult>(created.Value);
+            Assert.IsAssignableFrom<RegisterPaymentResponse>(created.Value);
             Assert.Equal(ExpenseStatus.Paid, expense.Status);
         }
 
@@ -521,11 +546,11 @@ namespace Roomies.Tests.UnitTests
             _expenses.Expenses = new List<Expense> { expense };
 
             // act
-            var result = controller.Post(payment).Result;
+            var result = controller.Post(_handler, payment).Result;
 
             // assert
             var created = Assert.IsType<CreatedAtActionResult>(result);
-            Assert.IsAssignableFrom<PaymentResult>(created.Value);
+            Assert.IsAssignableFrom<RegisterPaymentResponse>(created.Value);
             Assert.Equal(payment.Amount, _expenses.PaymentUpdates[0].Summary.Amount);
             Assert.Equal(payment.PaidBy, _expenses.PaymentUpdates[0].Summary.By.Id);
         }
@@ -543,11 +568,11 @@ namespace Roomies.Tests.UnitTests
                 .ToList();
 
             // act
-            var result = controller.Post(payment).Result;
+            var result = controller.Post(_handler, payment).Result;
 
             // assert
             var created = Assert.IsType<CreatedAtActionResult>(result);
-            var actual = Assert.IsAssignableFrom<PaymentResult>(created.Value);
+            var actual = Assert.IsAssignableFrom<RegisterPaymentResponse>(created.Value);
             Assert.Equal(expected, actual.Total);
         }
 
