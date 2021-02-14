@@ -29,7 +29,13 @@ namespace Roomies.App.UseCases.RegisterPayment
             if (!roommates.ContainsKey(payment.PaidBy))
                 exception.AddError("PaidBy", "The PaidBy field is invalid. Please review it.");
             if (!roommates.ContainsKey(payment.PaidTo))
-                exception.AddError("PaidTo", "The PaidBy field is invalid. Please review it.");
+                exception.AddError("PaidTo", "The PaidTo field is invalid. Please review it.");
+
+            if (payment.PaidBy == payment.PaidTo)
+            {
+                exception.AddError("PaidBy", "The PaidBy field appears to be identical to the PaidTo. Please review it.");
+                exception.AddError("PaidTo", "The PaidTo field appears to be identical to the PaidBy. Please review it.");
+            }
 
             var expenses = _expenses.Get(payment.ExpenseIds);
             if (expenses.Count() != payment.ExpenseIds.Count() || !expenses.Any())
