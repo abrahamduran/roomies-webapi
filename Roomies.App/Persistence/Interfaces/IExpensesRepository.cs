@@ -7,7 +7,7 @@ namespace Roomies.App.Persistence.Interfaces
     {
         Expense Get(string expenseId);
         IEnumerable<Expense> Get();
-        IEnumerable<Expense> Get(IEnumerable<string> expenseIds);
+        IEnumerable<Expense> Get(IEnumerable<string> ids);
         IEnumerable<Expense> Get(Roommate roommate);
         Expense Add(Expense expense);
         bool Remove(Expense expense);

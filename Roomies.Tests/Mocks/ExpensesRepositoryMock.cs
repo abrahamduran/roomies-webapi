@@ -22,7 +22,7 @@ namespace Roomies.Tests.Mocks
 
         public IEnumerable<Expense> Get() => Expenses;
 
-        public IEnumerable<Expense> Get(IEnumerable<string> expenseIds) => Expenses;
+        public IEnumerable<Expense> Get(IEnumerable<string> ids) => Expenses;
 
         public IEnumerable<Expense> Get(Roommate roommate) => Expenses;
 
