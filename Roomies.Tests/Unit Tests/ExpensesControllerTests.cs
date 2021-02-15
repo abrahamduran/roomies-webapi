@@ -625,7 +625,7 @@ namespace Roomies.Tests.UnitTests
             var payers = roommates.Skip(1).Select(x => Mock.Models.Payer(id: x.Id, amount: 50)).ToArray();
             var expense = Mock.Models.SimpleExpense(total: 100, payers: payers, payee: payee);
             _expenses.Expense = expense;
-            _expenses.SuccessfulDelete = true;
+            _expenses.DeleteResult = true;
             _roommates.Roommate = roommates[0];
             _roommates.Roommates = roommates.Skip(1);
 
@@ -648,7 +648,7 @@ namespace Roomies.Tests.UnitTests
             var payers = roommates.Skip(1).Select(x => Mock.Models.Payer(id: x.Id, amount: 50)).ToArray();
             var expense = Mock.Models.SimpleExpense(total: 100, payers: payers, payee: payee);
             _expenses.Expense = expense;
-            _expenses.SuccessfulDelete = false;
+            _expenses.DeleteResult = false;
             _roommates.Roommate = roommates[0];
             _roommates.Roommates = roommates.Skip(1);
 
@@ -923,7 +923,7 @@ namespace Roomies.Tests.UnitTests
             var expected = 200M;
             _roommates.Roommates = payers.Select(x => Mock.Models.Roommate(id: x.Id)).ToList();
             _roommates.Roommate = Mock.Models.Roommate(id: registerExpense.PayeeId);
-            _expenses.SuccessfulUpdate = true;
+            _expenses.UpdateResult = true;
             _expenses.Expense = Mock.Models.SimpleExpense(
                 total: 0,
                 payee: Mock.Models.Payee(id: registerExpense.PayeeId),
@@ -948,7 +948,7 @@ namespace Roomies.Tests.UnitTests
             var registerExpense = Mock.Requests.RegisterSimpleExpense(payeeId: roommate.Id, payers: payers, total: total);
             _roommates.Roommates = roommates;
             _roommates.Roommate = roommate;
-            _expenses.SuccessfulUpdate = true;
+            _expenses.UpdateResult = true;
             _expenses.Expense = Mock.Models.SimpleExpense(
                 total: 0,
                 payee: Mock.Models.Payee(id: registerExpense.PayeeId),
@@ -974,7 +974,7 @@ namespace Roomies.Tests.UnitTests
             var registerExpense = Mock.Requests.RegisterSimpleExpense(payeeId: roommate.Id, payers: payers, total: total, distribution: ExpenseDistribution.Custom);
             _roommates.Roommates = roommates.Select(x => x.roommate).ToList();
             _roommates.Roommate = roommate;
-            _expenses.SuccessfulUpdate = true;
+            _expenses.UpdateResult = true;
             _expenses.Expense = Mock.Models.SimpleExpense(
                 total: 0,
                 payee: Mock.Models.Payee(id: registerExpense.PayeeId),
@@ -1000,7 +1000,7 @@ namespace Roomies.Tests.UnitTests
             var registerExpense = Mock.Requests.RegisterSimpleExpense(payeeId: roommate.Id, payers: payers, total: total, distribution: ExpenseDistribution.Proportional);
             _roommates.Roommates = roommates.Select(x => x.roommate).ToList();
             _roommates.Roommate = roommate;
-            _expenses.SuccessfulUpdate = true;
+            _expenses.UpdateResult = true;
             _expenses.Expense = Mock.Models.SimpleExpense(
                 total: 0,
                 payee: Mock.Models.Payee(id: registerExpense.PayeeId),
@@ -1027,7 +1027,7 @@ namespace Roomies.Tests.UnitTests
             var expected = payers.Select(x => x.Id).ToList();
             _roommates.Roommates = payers.Select(x => Mock.Models.Roommate(id: x.Id)).ToList();
             _roommates.Roommate = Mock.Models.Roommate(id: registerExpense.PayeeId);
-            _expenses.SuccessfulUpdate = true;
+            _expenses.UpdateResult = true;
             _expenses.Expense = Mock.Models.SimpleExpense(
                 total: 0,
                 payee: Mock.Models.Payee(id: registerExpense.PayeeId),
@@ -1053,7 +1053,7 @@ namespace Roomies.Tests.UnitTests
             var registerExpense = Mock.Requests.RegisterSimpleExpense(businessName: expected, payers: payers);
             _roommates.Roommates = payers.Select(x => Mock.Models.Roommate(id: x.Id)).ToList();
             _roommates.Roommate = Mock.Models.Roommate(id: registerExpense.PayeeId);
-            _expenses.SuccessfulUpdate = true;
+            _expenses.UpdateResult = true;
             _expenses.Expense = Mock.Models.SimpleExpense(
                 total: 0,
                 payee: Mock.Models.Payee(id: registerExpense.PayeeId),
@@ -1078,7 +1078,7 @@ namespace Roomies.Tests.UnitTests
             var registerExpense = Mock.Requests.RegisterSimpleExpense(total: 100, payers: payers, distribution: ExpenseDistribution.Custom);
             _roommates.Roommates = payers.Select(x => Mock.Models.Roommate(id: x.Id, balance: 100)).ToList();
             _roommates.Roommate = Mock.Models.Roommate(id: registerExpense.PayeeId, balance: -200);
-            _expenses.SuccessfulUpdate = true;
+            _expenses.UpdateResult = true;
             _expenses.Expense = Mock.Models.SimpleExpense(
                 total: 200,
                 payee: Mock.Models.Payee(id: registerExpense.PayeeId),
@@ -1104,7 +1104,7 @@ namespace Roomies.Tests.UnitTests
             var registerExpense = Mock.Requests.RegisterSimpleExpense(total: 100, payers: payers, distribution: ExpenseDistribution.Custom);
             _roommates.Roommates = payers.Select(x => Mock.Models.Roommate(id: x.Id, balance: 100)).ToList();
             _roommates.Roommate = Mock.Models.Roommate(id: registerExpense.PayeeId, balance: -200);
-            _expenses.SuccessfulUpdate = false;
+            _expenses.UpdateResult = false;
             _expenses.Expense = Mock.Models.SimpleExpense(
                 total: 200,
                 payee: Mock.Models.Payee(id: registerExpense.PayeeId),
@@ -1406,7 +1406,7 @@ namespace Roomies.Tests.UnitTests
             var payeeId = "payee-identifier";
             _roommates.Roommates = payers.Select(x => Mock.Models.Roommate(id: x.Id)).ToList();
             _roommates.Roommate = Mock.Models.Roommate(id: payeeId);
-            _expenses.SuccessfulUpdate = true;
+            _expenses.UpdateResult = true;
             _expenses.Expense = Mock.Models.SimpleExpense(
                 total: 0,
                 payee: Mock.Models.Payee(id: payeeId),
@@ -1433,7 +1433,7 @@ namespace Roomies.Tests.UnitTests
             patch.Replace(x => x.Total, total);
             _roommates.Roommates = roommates;
             _roommates.Roommate = roommate;
-            _expenses.SuccessfulUpdate = true;
+            _expenses.UpdateResult = true;
             _expenses.Expense = Mock.Models.SimpleExpense(
                 total: 0,
                 payee: Mock.Models.Payee(id: roommate.Id),
@@ -1462,7 +1462,7 @@ namespace Roomies.Tests.UnitTests
             patch.Replace(x => x.Distribution, ExpenseDistribution.Custom);
             _roommates.Roommates = roommates.Select(x => x.roommate).ToList();
             _roommates.Roommate = roommate;
-            _expenses.SuccessfulUpdate = true;
+            _expenses.UpdateResult = true;
             _expenses.Expense = Mock.Models.SimpleExpense(
                 total: 0,
                 payee: Mock.Models.Payee(id: roommate.Id),
@@ -1491,7 +1491,7 @@ namespace Roomies.Tests.UnitTests
             patch.Replace(x => x.Distribution, ExpenseDistribution.Proportional);
             _roommates.Roommates = roommates.Select(x => x.roommate).ToList();
             _roommates.Roommate = roommate;
-            _expenses.SuccessfulUpdate = true;
+            _expenses.UpdateResult = true;
             _expenses.Expense = Mock.Models.SimpleExpense(
                 total: 0,
                 payee: Mock.Models.Payee(id: roommate.Id),
@@ -1520,7 +1520,7 @@ namespace Roomies.Tests.UnitTests
             var payeeId = "payee-identifier";
             _roommates.Roommates = payers.Select(x => Mock.Models.Roommate(id: x.Id)).ToList();
             _roommates.Roommate = Mock.Models.Roommate(id: payeeId);
-            _expenses.SuccessfulUpdate = true;
+            _expenses.UpdateResult = true;
             _expenses.Expense = Mock.Models.SimpleExpense(
                 total: 0,
                 payee: Mock.Models.Payee(id: payeeId),
@@ -1549,7 +1549,7 @@ namespace Roomies.Tests.UnitTests
             var payeeId = "payee-identifier";
             _roommates.Roommates = payers.Select(x => Mock.Models.Roommate(id: x.Id)).ToList();
             _roommates.Roommate = Mock.Models.Roommate(id: payeeId);
-            _expenses.SuccessfulUpdate = true;
+            _expenses.UpdateResult = true;
             _expenses.Expense = Mock.Models.SimpleExpense(
                 total: 0,
                 payee: Mock.Models.Payee(id: payeeId),
@@ -1578,7 +1578,7 @@ namespace Roomies.Tests.UnitTests
             _roommates.Roommates = payers.Select(x => Mock.Models.Roommate(id: x.Id, balance: 100)).ToList();
             var payeeId = "payee-identifier";
             _roommates.Roommate = Mock.Models.Roommate(id: payeeId, balance: -200);
-            _expenses.SuccessfulUpdate = true;
+            _expenses.UpdateResult = true;
             _expenses.Expense = Mock.Models.SimpleExpense(
                 total: 200,
                 payee: Mock.Models.Payee(id: payeeId),
@@ -1608,7 +1608,7 @@ namespace Roomies.Tests.UnitTests
             _roommates.Roommates = payers.Select(x => Mock.Models.Roommate(id: x.Id, balance: 100)).ToList();
             var payeeId = "payee-identifier";
             _roommates.Roommate = Mock.Models.Roommate(id: payeeId, balance: -200);
-            _expenses.SuccessfulUpdate = false;
+            _expenses.UpdateResult = false;
             _expenses.Expense = Mock.Models.SimpleExpense(
                 total: 200,
                 payee: Mock.Models.Payee(id: payeeId),
@@ -2107,7 +2107,7 @@ namespace Roomies.Tests.UnitTests
             var items = new[] { Mock.Models.ExpenseItem(payers: payers, price: 100) };
             var expense = Mock.Models.DetailedExpense(total: 100, items: items, payee: payee);
             _expenses.Expense = expense;
-            _expenses.SuccessfulDelete = true;
+            _expenses.DeleteResult = true;
             _roommates.Roommate = roommates[0];
             _roommates.Roommates = roommates.Skip(1);
 
@@ -2151,7 +2151,7 @@ namespace Roomies.Tests.UnitTests
             var items = new[] { Mock.Models.ExpenseItem(payers: payers, price: 100) };
             var expense = Mock.Models.DetailedExpense(total: 100, items: items, payee: payee);
             _expenses.Expense = expense;
-            _expenses.SuccessfulDelete = false;
+            _expenses.DeleteResult = false;
             _roommates.Roommate = roommates[0];
             _roommates.Roommates = roommates.Skip(1);
 

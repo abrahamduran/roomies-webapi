@@ -13,8 +13,8 @@ namespace Roomies.Tests.Mocks
         public ExpenseItem ExpenseItem { get; set; }
         public IEnumerable<ExpenseItem> ExpenseItems { get; set; }
         public List<PaymentUpdate> PaymentUpdates { get; set; }
-        public bool SuccessfulDelete { get; set; }
-        public bool SuccessfulUpdate { get; set; }
+        public bool DeleteResult { get; set; }
+        public bool UpdateResult { get; set; }
 
         public Expense Add(Expense expense) => expense;
 
@@ -30,12 +30,12 @@ namespace Roomies.Tests.Mocks
 
         public IEnumerable<ExpenseItem> GetItems(string expenseId) => ExpenseItems;
 
-        public bool Remove(Expense expense) => SuccessfulDelete;
+        public bool Remove(Expense expense) => DeleteResult;
 
         public bool Update(Expense expense)
         {
             Expense = expense;
-            return SuccessfulUpdate;
+            return UpdateResult;
         }
 
         public void SetPayment(IEnumerable<PaymentUpdate> payments)
