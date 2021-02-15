@@ -22,6 +22,8 @@ namespace Roomies.Tests.Mocks
 
         public IEnumerable<Payment> Get(Roommate roommate) => Payments;
 
+        public IEnumerable<Payment> Get(IEnumerable<string> ids) => Payments;
+
         public bool Remove(Payment payment) => DeleteResult;
     }
 }
