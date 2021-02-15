@@ -15,6 +15,7 @@
     <Folder Include="Extensions\" />
     <Folder Include="Use Cases\Register Expense\" />
     <Folder Include="Use Cases\Register Payment\" />
+    <Folder Include="Use Cases\Delete Payment\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="MongoDB.Driver" Version="2.11.5" />

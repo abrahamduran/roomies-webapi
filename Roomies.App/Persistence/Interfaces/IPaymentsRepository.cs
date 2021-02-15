@@ -9,5 +9,6 @@ namespace Roomies.App.Persistence.Interfaces
         IEnumerable<Payment> Get();
         IEnumerable<Payment> Get(Roommate roommate);
         Payment Add(Payment payment);
+        bool Remove(Payment payment);
     }
 }

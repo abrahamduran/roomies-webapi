@@ -8,6 +8,7 @@ namespace Roomies.Tests.Mocks
     {
         public Payment Payment { get; set; }
         public IEnumerable<Payment> Payments { get; set; }
+        public bool DeleteResult { get; set; }
 
         public Payment Add(Payment payment)
         {
@@ -20,5 +21,7 @@ namespace Roomies.Tests.Mocks
         public IEnumerable<Payment> Get() => Payments;
 
         public IEnumerable<Payment> Get(Roommate roommate) => Payments;
+
+        public bool Remove(Payment payment) => DeleteResult;
     }
 }

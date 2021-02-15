@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Roomies.App.Models;
 using Roomies.App.Persistence.Interfaces;
 using Roomies.App.UseCases;
+using Roomies.App.UseCases.DeletePayment;
 using Roomies.App.UseCases.RegisterPayment;
 using Roomies.WebAPI.Extensions;
 using Roomies.WebAPI.Requests;
@@ -79,17 +80,17 @@ namespace Roomies.WebAPI.Controllers
         // DELETE api/payments/5
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult Delete(string id)
+        public ActionResult Delete([FromServices] DeletePaymentHandler handler, string id)
         {
-            var payment = _payments.Get(id);
-            if (payment == null) return NotFound();
+            var result = handler.Execute(id);
+            if (result == null) return NotFound();
 
-            _expenses.UnsetPayment(payment.Id, payment.Expenses);
-            _roommates.UpdateBalance(payment.By.Id, payment.Total);
-            _roommates.UpdateBalance(payment.To.Id, -payment.Total);
-
-            return NoContent();
+            if (result == true)
+                return NoContent();
+            else
+                return BadRequest("The payment could not be deleted.");
         }
 
         private PaymentResult toResponse(Payment payment) => toResponse(payment, false);

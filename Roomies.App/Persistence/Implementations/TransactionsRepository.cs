@@ -113,8 +113,12 @@ namespace Roomies.App.Persistence.Implementations
             return transaction;
         }
 
-        bool IExpensesRepository.Remove(Expense expense)
-            => _transactions.OfType<Expense>().DeleteOne(x => x.Id == expense.Id).DeletedCount > 0;
+        bool IExpensesRepository.Remove(Expense expense) => DeleteOne(expense);
+
+        bool IPaymentsRepository.Remove(Payment payment) => DeleteOne(payment);
+
+        private bool DeleteOne(Transaction transaction)
+            => _transactions.DeleteOne(x => x.Id == transaction.Id).DeletedCount > 0;
 
         bool IExpensesRepository.Update(Expense expense)
             => _transactions.OfType<Expense>().ReplaceOne(x => x.Id == expense.Id, expense).ModifiedCount > 0;
