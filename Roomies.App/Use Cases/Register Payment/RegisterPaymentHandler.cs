@@ -23,9 +23,10 @@ namespace Roomies.App.UseCases.RegisterPayment
 
         public RegisterPaymentResponse Execute(RegisterPaymentRequest payment)
         {
-            var exception = new UseCaseException();
-
             var roommates = _roommates.Get(new[] { payment.PaidTo, payment.PaidBy }).ToDictionary(x => x.Id);
+
+            #region Validations
+            var exception = new UseCaseException();
             if (!roommates.ContainsKey(payment.PaidBy))
                 exception.AddError("PaidBy", "The PaidBy field is invalid. Please review it.");
             if (!roommates.ContainsKey(payment.PaidTo))
@@ -77,6 +78,7 @@ namespace Roomies.App.UseCases.RegisterPayment
                 exception.AddError("Amount", $"Payment amount: {payment.Amount}, expenses total: {totalExpense}, difference: {totalExpense - payment.Amount}");
                 throw exception;
             }
+            #endregion
 
             var entity = new Payment
             {
