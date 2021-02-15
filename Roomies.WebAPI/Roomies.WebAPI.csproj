@@ -14,9 +14,9 @@
     <Folder Include="Responses\" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.JsonPatch" Version="5.0.1" />
-    <PackageReference Include="MongoDB.Driver" Version="2.11.5" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
+    <PackageReference Include="Microsoft.AspNetCore.JsonPatch" Version="5.0.3" />
+    <PackageReference Include="MongoDB.Driver" Version="2.11.6" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.0.5" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Roomies.App\Roomies.App.csproj">
