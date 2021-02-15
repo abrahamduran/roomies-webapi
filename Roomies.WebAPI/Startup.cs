@@ -17,6 +17,9 @@ using Roomies.App.Models;
 using Roomies.App.Persistence.Implementations;
 using Roomies.App.Persistence.Interfaces;
 using Roomies.App.Persistence;
+using Roomies.App.UseCases.RegisterPayment;
+using Roomies.App.UseCases.RegisterExpense;
+using Roomies.App.UseCases.DeletePayment;
 
 namespace Roomies.WebAPI
 {
@@ -81,6 +84,9 @@ namespace Roomies.WebAPI
             services.AddScoped<IPaymentsRepository, TransactionsRepository>();
             services.AddScoped<IExpensesRepository, TransactionsRepository>();
             services.AddHostedService<AutocompleteIndexer>();
+            services.AddTransient<RegisterPaymentHandler>();
+            services.AddTransient<RegisterExpenseHandler>();
+            services.AddTransient<DeletePaymentHandler>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
