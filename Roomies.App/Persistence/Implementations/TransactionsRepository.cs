@@ -31,15 +31,19 @@ namespace Roomies.App.Persistence.Implementations
             #endregion
         }
 
-        Expense IExpensesRepository.Get(string id) => _transactions.OfType<Expense>().Find(x => x.Id == id).SingleOrDefault();
+        Expense IExpensesRepository.Get(string id) => GetById<Expense>(id);
 
-        Payment IPaymentsRepository.Get(string id) => _transactions.OfType<Payment>().Find(x => x.Id == id).SingleOrDefault();
+        Payment IPaymentsRepository.Get(string id) => GetById<Payment>(id);
 
-        IEnumerable<Transaction> ITransactionsRepository.Get() => _transactions.Find(transaction => true).SortByDescending(x => x.Date).ToList();
+        IEnumerable<Transaction> ITransactionsRepository.Get() => GetList<Transaction>();
 
-        IEnumerable<Expense> IExpensesRepository.Get() => _transactions.OfType<Expense>().Find(expense => true).SortByDescending(x => x.Date).ToList();
+        IEnumerable<Expense> IExpensesRepository.Get() => GetList<Expense>();
 
-        IEnumerable<Expense> IExpensesRepository.Get(IEnumerable<string> ids) => _transactions.OfType<Expense>().Find(x => ids.Contains(x.Id)).SortByDescending(x => x.Date).ToList();
+        IEnumerable<Payment> IPaymentsRepository.Get() => GetList<Payment>();
+
+        IEnumerable<Expense> IExpensesRepository.Get(IEnumerable<string> ids) => GetByIds<Expense>(ids);
+
+        IEnumerable<Payment> IPaymentsRepository.Get(IEnumerable<string> ids) => GetByIds<Payment>(ids);
 
         IEnumerable<Expense> IExpensesRepository.Get(Roommate roommate)
         {
@@ -53,8 +57,6 @@ namespace Roomies.App.Persistence.Implementations
 
             return _transactions.OfType<Expense>().Find(filterPayee & filterPayer).SortByDescending(x => x.Date).ToList();
         }
-
-        IEnumerable<Payment> IPaymentsRepository.Get() => _transactions.OfType<Payment>().Find(payment => true).SortByDescending(x => x.Date).ToList();
 
         IEnumerable<Payment> IPaymentsRepository.Get(Roommate roommate)
         {
@@ -113,14 +115,62 @@ namespace Roomies.App.Persistence.Implementations
             return transaction;
         }
 
-        bool IExpensesRepository.Remove(Expense expense) => DeleteOne(expense);
+        bool IExpensesRepository.Remove(Expense expense) => Remove<Expense>(expense.Id);
 
-        bool IPaymentsRepository.Remove(Payment payment) => DeleteOne(payment);
-
-        private bool DeleteOne(Transaction transaction)
-            => _transactions.DeleteOne(x => x.Id == transaction.Id).DeletedCount > 0;
+        bool IPaymentsRepository.Remove(Payment payment) => Remove<Payment>(payment.Id);
 
         bool IExpensesRepository.Update(Expense expense)
             => _transactions.OfType<Expense>().ReplaceOne(x => x.Id == expense.Id, expense).ModifiedCount > 0;
+
+        #region Generics
+        private IEnumerable<Type> GetList<Type>() where Type : Transaction
+        {
+            try
+            {
+                return _transactions.OfType<Type>().Find(transaction => true).SortByDescending(x => x.Date).ToList();
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private Type GetById<Type>(string id) where Type : Transaction
+        {
+            try
+            {
+                return _transactions.OfType<Type>().Find(x => x.Id == id).SingleOrDefault();
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private IEnumerable<Type> GetByIds<Type>(IEnumerable<string> ids) where Type : Transaction
+        {
+            try
+            {
+                return _transactions.OfType<Type>().Find(x => ids.Contains(x.Id)).SortByDescending(x => x.Date).ToList();
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private bool Remove<Type>(string id) where Type : Transaction
+        {
+            try
+            {
+                return _transactions.OfType<Type>().DeleteOne(x => x.Id == id).DeletedCount > 0;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        #endregion
     }
 }
